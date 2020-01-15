@@ -2999,7 +2999,7 @@ elseif(ANDROID)
         list(GET PLs ${idx} pl)
         list(GET ASMs ${idx} asm)
 
-        MESSAGE("Running \"${pl}\" to get \"${asm}\"")
+        MESSAGE("Running \"${pl}\" to get \"${asm}\" in ${CMAKE_CURRENT_LIST_DIR}")
         EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE}
             ${pl} void ${asm}
             WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
