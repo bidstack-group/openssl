@@ -3718,6 +3718,8 @@ elseif(ANDROID)
     TARGET_COMPILE_OPTIONS(crypto PRIVATE -Qunused-arguments -pthread  -Wa,--noexecstack -fPIC) 
 ELSEIF(${ANDROID_ABI} STREQUAL "arm64-v8a")
         set(arch "android-arm64")
+
+        FIND_PROGRAM(PERL_EXECUTABLE perl)
         MESSAGE("Configuring configdata.pm  for \"${arch}\"")
         EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE}
             Configure ${arch}
