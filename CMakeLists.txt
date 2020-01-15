@@ -2264,7 +2264,7 @@ elseif(ANDROID)
         list(GET PLs ${idx} pl)
         list(GET ASMs ${idx} asm)
 
-        MESSAGE("Running "${pl}" to get "${asm}"")
+        MESSAGE("Running \"${pl}\" to get \"${asm}\"")
         EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE}
             ${pl} android -fPIC -pthread  -target i686-linux-android -Wa,--noexecstack -Qunused-arguments -Wall -O3 -fomit-frame-pointer -DOPENSSL_USE_NODELETE -DOPENSSL_PIC -DOPENSSL_CPUID_OBJ -DOPENSSL_BN_ASM_PART_WORDS -DOPENSSL_IA32_SSE2 -DOPENSSL_BN_ASM_MONT -DOPENSSL_BN_ASM_GF2m -DSHA1_ASM -DSHA256_ASM -DSHA512_ASM -DRC4_ASM -DMD5_ASM -DRMD160_ASM -DVPAES_ASM -DWHIRLPOOL_ASM -DGHASH_ASM -DECP_NISTZ256_ASM -DPOLY1305_ASM -DOPENSSLDIR="/usr/local/ssl" -DENGINESDIR="/usr/local/lib/engines-1.1" -DNDEBUG   ${asm}
             WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
@@ -2999,7 +2999,7 @@ elseif(ANDROID)
         list(GET PLs ${idx} pl)
         list(GET ASMs ${idx} asm)
 
-        MESSAGE("Running "${pl}" to get "${asm}"")
+        MESSAGE("Running \"${pl}\" to get \"${asm}\"")
         EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE}
             ${pl} void ${asm}
             WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
@@ -3734,7 +3734,7 @@ ELSEIF(${ANDROID_ABI} STREQUAL "arm64-v8a")
             list(GET PLs ${idx} pl)
             list(GET ASMs ${idx} asm)
 
-            MESSAGE("Running "${pl}" to get "${asm}"")
+            MESSAGE("Running \"${pl}\" to get \"${asm}\"")
             EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE}
                 ${pl} linux64 ${asm}
                 WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
