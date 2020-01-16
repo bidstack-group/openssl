@@ -5,17 +5,24 @@ if(CMAKE_OSX_SYSROOT MATCHES MacOSX)
 
         set(arch "darwin64-x86_64-cc")
         MESSAGE("Configuring configdata.pm  for \"${arch}\"")
+        FIND_PROGRAM(PERL_EXECUTABLE perl)
+        IF(NOT PERL_EXECUTABLE)
+            MESSAGE(FATAL_ERROR(${PERL_EXECUTABLE}))
+        ENDIF(NOT PERL_EXECUTABLE)
         EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} Configure ${arch}
                 WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
                 OUTPUT_VARIABLE TEMP
+                ERROR_VARIABLE error
             )
+        if(error)
+            MESSAGE(FATAL_ERROR(${error}))
+        endif(error)
 
 
         EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} util/mkbuildinf.pl "clang -arch x86_64 -fPIC -pthread -m64 -Wa,--noexecstack -Qunused-arguments -Wall -O3 -DOPENSSL_USE_NODELETE -DL_ENDIAN -DOPENSSL_BUILDING_OPENSSL -DOPENSSL_PIC -DNDEBUG" "${arch}" 
             WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
             OUTPUT_FILE crypto/buildinf.h)
             
-
         EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} 
             "-I${CMAKE_CURRENT_LIST_DIR}" -Mconfigdata "util/dofile.pl" "-oMakefile" crypto/include/internal/bn_conf.h.in
             WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
@@ -29,7 +36,11 @@ if(CMAKE_OSX_SYSROOT MATCHES MacOSX)
         EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} 
             "-I${CMAKE_CURRENT_LIST_DIR}" -Mconfigdata "util/dofile.pl" "-oMakefile" include/openssl/opensslconf.h.in 
             WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-            OUTPUT_FILE include/openssl/opensslconf.h)
+            OUTPUT_FILE include/openssl/opensslconf.h
+            ERROR_VARIABLE error)
+        if(error)
+            MESSAGE(FATAL_ERROR(${error}))
+        endif(error)
 
 
 
