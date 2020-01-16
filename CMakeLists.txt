@@ -3,33 +3,33 @@ project(open_ssl C ASM)
 
 if(CMAKE_OSX_SYSROOT MATCHES MacOSX)
 
-        set(arch "darwin64-x86_64-cc")
-        MESSAGE("Configuring configdata.pm  for \"${arch}\"")
-        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} Configure ${arch}
-                WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-                OUTPUT_VARIABLE TEMP
-            )
+    set(arch "darwin64-x86_64-cc")
+    MESSAGE("Configuring configdata.pm  for \"${arch}\"")
+    EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} Configure ${arch}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+        OUTPUT_VARIABLE TEMP
+    )
 
 
-        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} util/mkbuildinf.pl "clang -arch x86_64 -fPIC -pthread -m64 -Wa,--noexecstack -Qunused-arguments -Wall -O3 -DOPENSSL_USE_NODELETE -DL_ENDIAN -DOPENSSL_BUILDING_OPENSSL -DOPENSSL_PIC -DNDEBUG linux-x86_64-clang" 
-            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-            OUTPUT_FILE crypto/buildinf.h)
-            
+    EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} util/mkbuildinf.pl "clang -arch x86_64 -fPIC -pthread -m64 -Wa,--noexecstack -Qunused-arguments -Wall -O3 -DOPENSSL_USE_NODELETE -DL_ENDIAN -DOPENSSL_BUILDING_OPENSSL -DOPENSSL_PIC -DNDEBUG linux-x86_64-clang" 
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+        OUTPUT_FILE crypto/buildinf.h)
 
-        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} 
-            "-I${CMAKE_CURRENT_LIST_DIR}" -Mconfigdata "util/dofile.pl" "-oMakefile" crypto/include/internal/bn_conf.h.in
-            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-            OUTPUT_FILE crypto/include/internal/bn_conf.h)
 
-        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} 
-            "-I${CMAKE_CURRENT_LIST_DIR}" -Mconfigdata "util/dofile.pl" "-oMakefile" crypto/include/internal/dso_conf.h.in
-            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-            OUTPUT_FILE crypto/include/internal/dso_conf.h)
+    EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} 
+        "-I${CMAKE_CURRENT_LIST_DIR}" -Mconfigdata "util/dofile.pl" "-oMakefile" crypto/include/internal/bn_conf.h.in
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+        OUTPUT_FILE crypto/include/internal/bn_conf.h)
 
-        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} 
-            "-I${CMAKE_CURRENT_LIST_DIR}" -Mconfigdata "util/dofile.pl" "-oMakefile" include/openssl/opensslconf.h.in 
-            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-            OUTPUT_FILE include/openssl/opensslconf.h)
+    EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} 
+        "-I${CMAKE_CURRENT_LIST_DIR}" -Mconfigdata "util/dofile.pl" "-oMakefile" crypto/include/internal/dso_conf.h.in
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+        OUTPUT_FILE crypto/include/internal/dso_conf.h)
+
+    EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} 
+        "-I${CMAKE_CURRENT_LIST_DIR}" -Mconfigdata "util/dofile.pl" "-oMakefile" include/openssl/opensslconf.h.in 
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+        OUTPUT_FILE include/openssl/opensslconf.h)
 
 
 
@@ -769,15 +769,23 @@ if(CMAKE_OSX_SYSROOT MATCHES MacOSX)
     TARGET_COMPILE_DEFINITIONS(crypto PRIVATE  GHASH_ASM _REENTRANT ENGINESDIR="/usr/local/lib/engines-1.1" OPENSSLDIR="/usr/local/ssl" SHA512_ASM RC4_ASM OPENSSL_BN_ASM_GF2m VPAES_ASM OPENSSL_PIC POLY1305_ASM OPENSSL_BN_ASM_MONT MD5_ASM OPENSSL_CPUID_OBJ SHA1_ASM X25519_ASM ECP_NISTZ256_ASM OPENSSL_IA32_SSE2 L_ENDIAN NDEBUG SHA256_ASM OPENSSL_BN_ASM_MONT5 KECCAK1600_ASM)
     TARGET_COMPILE_OPTIONS(crypto PRIVATE -fPIC -arch x86_64)
 elseif(CMAKE_OSX_SYSROOT MATCHES iPhoneOS)
-        set(arch "ios-cross")
-        MESSAGE("Configuring configdata.pm  for \"${arch}\"")
-        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE}
-            Configure ${arch}
-            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-            OUTPUT_VARIABLE TEMP
-        )
+        set(arch "$ios-cross")
+        find_program(PERL_EXECUTABLE perl)
+        if(NOT PERL_EXECUTABLE)
+            message(FATAL_ERROR("Perl not found"))
+        endif(NOT PERL_EXECUTABLE)
 
-        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} util/mkbuildinf.pl "clang -arch arm64 -fPIC -pthread -m64 -Wa,--noexecstack -Qunused-arguments -Wall -O3 -DOPENSSL_USE_NODELETE -DL_ENDIAN -DOPENSSL_BUILDING_OPENSSL -DOPENSSL_PIC -DNDEBUG" "linux-x86_64-clang" 
+        message("Configuring configdata.pm for "${arch}"")
+        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} Configure ${arch}
+                WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+                OUTPUT_VARIABLE TEMP
+                ERROR_VARIABLE ERROR
+        )
+        if(ERROR)
+            MESSAGE(FATAL_ERROR("Error while configuring: ${ERROR}"))
+        endif(ERROR)
+
+        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} util/mkbuildinf.pl "clang -arch arm64 -fPIC -pthread -m64 -Wa,--noexecstack -Qunused-arguments -Wall -O3 -DOPENSSL_USE_NODELETE -DL_ENDIAN -DOPENSSL_BUILDING_OPENSSL -DOPENSSL_PIC -DNDEBUG" "ios-cross" 
             WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
             OUTPUT_FILE crypto/buildinf.h)
             
