@@ -11,7 +11,7 @@ if(CMAKE_OSX_SYSROOT MATCHES MacOSX)
             )
 
 
-        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} util/mkbuildinf.pl "clang -arch x86_64 -fPIC -pthread -m64 -Wa,--noexecstack -Qunused-arguments -Wall -O3 -DOPENSSL_USE_NODELETE -DL_ENDIAN -DOPENSSL_BUILDING_OPENSSL -DOPENSSL_PIC -DNDEBUG linux-x86_64-clang" 
+        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} util/mkbuildinf.pl "clang -arch x86_64 -fPIC -pthread -m64 -Wa,--noexecstack -Qunused-arguments -Wall -O3 -DOPENSSL_USE_NODELETE -DL_ENDIAN -DOPENSSL_BUILDING_OPENSSL -DOPENSSL_PIC -DNDEBUG" "${arch}" 
             WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
             OUTPUT_FILE crypto/buildinf.h)
             
