@@ -1515,8 +1515,8 @@ elseif(CMAKE_OSX_SYSROOT MATCHES iPhoneOS)
 
         TARGET_INCLUDE_DIRECTORIES(crypto PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} crypto/ec/curve448 crypto/ec/curve448/arch_32 include crypto/include crypto/modes crypto)
         TARGET_COMPILE_DEFINITIONS(crypto PRIVATE  OPENSSLDIR="/usr/local/ssl" OPENSSL_PIC ENGINESDIR="/usr/local/lib/engines-1.1" NDEBUG _REENTRANT)
-	#TARGET_COMPILE_OPTIONS(crypto PRIVATE )
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mios-version-min=7.0.0 -fno-common  -fPIC")
+    #TARGET_COMPILE_OPTIONS(crypto PRIVATE )
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mios-version-min=7.0.0 -fno-common  -fPIC")
         
 elseif(ANDROID)
     IF(${ANDROID_ABI} STREQUAL "x86_64")
@@ -2266,12 +2266,42 @@ elseif(ANDROID)
 
     ELSEIF(${ANDROID_ABI} STREQUAL "x86")
         set(arch "android-x86")
-        MESSAGE("Configuring configdata.pm  for \"${arch}\"")
-        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE}
-            Configure ${arch}
+        find_program(PERL_EXECUTABLE perl)
+        if(NOT PERL_EXECUTABLE)
+            message(FATAL_ERROR("Perl not found"))
+        endif(NOT PERL_EXECUTABLE)
+
+        SET(ENV{PATH} "${ANDROID_TOOLCHAIN_ROOT}/bin\;$ENV{PATH}")
+        message("Configuring configdata.pm for \"${arch} -D__ANDROID_API__=${ANDROID_PLATFORM_LEVEL}\"")
+        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} Configure ${arch} -D__ANDROID_API__=${ANDROID_PLATFORM_LEVEL}
                 WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
                 OUTPUT_VARIABLE TEMP
-            )
+                ERROR_VARIABLE ERROR
+        )
+        if(ERROR)
+            MESSAGE(FATAL_ERROR("Error while configuring: ${ERROR}"))
+        endif(ERROR)
+
+        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} util/mkbuildinf.pl "TODO: " "${arch}" 
+            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+            OUTPUT_FILE crypto/buildinf.h
+            ERROR_VARIABLE ERROR)
+        if(ERROR)
+            MESSAGE(FATAL_ERROR("Error while generating mkbuildinf: ${ERROR}"))
+        endif(ERROR)
+
+        foreach(el crypto/include/internal/bn_conf.h;crypto/include/internal/dso_conf.h;include/openssl/opensslconf.h)
+            MESSAGE("Generating ${el}")
+            EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE}
+                "-I${CMAKE_CURRENT_LIST_DIR}" -Mconfigdata "util/dofile.pl" "-oMakefile" ${el}.in
+                WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+                OUTPUT_FILE ${el}
+                ERROR_VARIABLE error)
+            if(error)
+                message(FATAL_ERROR("Error while generating: ${error}"))
+            endif(error)
+        endforeach()
+
     set(PLs crypto/aes/asm/aesni-x86.pl crypto/aes/asm/vpaes-x86.pl crypto/bf/asm/bf-586.pl crypto/bn/asm/bn-586.pl crypto/bn/asm/co-586.pl crypto/bn/asm/x86-gf2m.pl crypto/bn/asm/x86-mont.pl crypto/camellia/asm/cmll-x86.pl crypto/chacha/asm/chacha-x86.pl crypto/des/asm/crypt586.pl crypto/des/asm/des-586.pl crypto/ec/asm/ecp_nistz256-x86.pl crypto/md5/asm/md5-586.pl crypto/modes/asm/ghash-x86.pl crypto/poly1305/asm/poly1305-x86.pl crypto/rc4/asm/rc4-586.pl crypto/ripemd/asm/rmd-586.pl crypto/sha/asm/sha1-586.pl crypto/sha/asm/sha256-586.pl crypto/sha/asm/sha512-586.pl crypto/whrlpool/asm/wp-mmx.pl crypto/x86cpuid.pl engines/asm/e_padlock-x86.pl)
     set(ASMs crypto/aes/aesni-x86.s crypto/aes/vpaes-x86.s crypto/bf/bf-586.s crypto/bn/bn-586.s crypto/bn/co-586.s crypto/bn/x86-gf2m.s crypto/bn/x86-mont.s crypto/camellia/cmll-x86.s crypto/chacha/chacha-x86.s crypto/des/crypt586.s crypto/des/des-586.s crypto/ec/ecp_nistz256-x86.s crypto/md5/md5-586.s crypto/modes/ghash-x86.s crypto/poly1305/poly1305-x86.s crypto/rc4/rc4-586.s crypto/ripemd/rmd-586.s crypto/sha/sha1-586.s crypto/sha/sha256-586.s crypto/sha/sha512-586.s crypto/whrlpool/wp-mmx.s crypto/x86cpuid.s engines/e_padlock-x86.s)
     list(LENGTH PLs _len)
