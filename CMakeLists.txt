@@ -777,7 +777,7 @@ elseif(CMAKE_OSX_SYSROOT MATCHES iPhoneOS)
             OUTPUT_VARIABLE TEMP
         )
 
-        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} util/mkbuildinf.pl "clang -arch arm64 -fPIC -pthread -m64 -Wa,--noexecstack -Qunused-arguments -Wall -O3 -DOPENSSL_USE_NODELETE -DL_ENDIAN -DOPENSSL_BUILDING_OPENSSL -DOPENSSL_PIC -DNDEBUG" "linux-x86_64-clang" 
+        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} util/mkbuildinf.pl "clang -arch arm64 -fPIC -pthread -m64 -Wa,--noexecstack -Qunused-arguments -Wall -O3 -DOPENSSL_USE_NODELETE -DL_ENDIAN -DOPENSSL_BUILDING_OPENSSL -DOPENSSL_PIC -DNDEBUG" "ios-cross" 
             WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
             OUTPUT_FILE crypto/buildinf.h)
             
@@ -811,7 +811,11 @@ elseif(CMAKE_OSX_SYSROOT MATCHES iPhoneOS)
             ${pl} ios64 ${asm}
             WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
             OUTPUT_VARIABLE temp
+            ERROR_VARIABLE error
         )
+        IF(error)
+            MESSAGE(FATAL_ERROR(${error}))
+        ENDIF(error)
     endforeach()
     SET(ssl_SRCS
     ssl/t1_enc.c
