@@ -3,35 +3,49 @@ project(open_ssl C ASM)
 
 if(CMAKE_OSX_SYSROOT MATCHES MacOSX)
 
-    set(arch "darwin64-x86_64-cc")
-    MESSAGE("Configuring configdata.pm  for \"${arch}\"")
-    EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} Configure ${arch}
-        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-        OUTPUT_VARIABLE TEMP
-    )
+        set(arch "darwin64-x86_64-cc")
+        MESSAGE("Configuring configdata.pm  for \"${arch}\"")
+        FIND_PROGRAM(PERL_EXECUTABLE perl)
+        IF(NOT PERL_EXECUTABLE)
+            MESSAGE(FATAL_ERROR(${PERL_EXECUTABLE}))
+        ENDIF(NOT PERL_EXECUTABLE)
+        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} Configure ${arch}
+                WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+                OUTPUT_VARIABLE TEMP
+                ERROR_VARIABLE error
+            )
+        if(error)
+            MESSAGE(FATAL_ERROR(${error}))
+        endif(error)
 
 
-    EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} util/mkbuildinf.pl "clang -arch x86_64 -fPIC -pthread -m64 -Wa,--noexecstack -Qunused-arguments -Wall -O3 -DOPENSSL_USE_NODELETE -DL_ENDIAN -DOPENSSL_BUILDING_OPENSSL -DOPENSSL_PIC -DNDEBUG linux-x86_64-clang" 
-        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-        OUTPUT_FILE crypto/buildinf.h)
+        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} util/mkbuildinf.pl "clang -arch x86_64 -fPIC -pthread -m64 -Wa,--noexecstack -Qunused-arguments -Wall -O3 -DOPENSSL_USE_NODELETE -DL_ENDIAN -DOPENSSL_BUILDING_OPENSSL -DOPENSSL_PIC -DNDEBUG" "${arch}" 
+            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+            OUTPUT_FILE crypto/buildinf.h)
+            
+        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} 
+            "-I${CMAKE_CURRENT_LIST_DIR}" -Mconfigdata "util/dofile.pl" "-oMakefile" crypto/include/internal/bn_conf.h.in
+            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+            OUTPUT_FILE crypto/include/internal/bn_conf.h)
 
+        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} 
+            "-I${CMAKE_CURRENT_LIST_DIR}" -Mconfigdata "util/dofile.pl" "-oMakefile" crypto/include/internal/bn_conf.h.in
+            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+            OUTPUT_FILE crypto/include/internal/bn_conf.h)
 
-    EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} 
-        "-I${CMAKE_CURRENT_LIST_DIR}" -Mconfigdata "util/dofile.pl" "-oMakefile" crypto/include/internal/bn_conf.h.in
-        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-        OUTPUT_FILE crypto/include/internal/bn_conf.h)
+        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} 
+            "-I${CMAKE_CURRENT_LIST_DIR}" -Mconfigdata "util/dofile.pl" "-oMakefile" crypto/include/internal/dso_conf.h.in
+            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+            OUTPUT_FILE crypto/include/internal/dso_conf.h)
 
-    EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} 
-        "-I${CMAKE_CURRENT_LIST_DIR}" -Mconfigdata "util/dofile.pl" "-oMakefile" crypto/include/internal/dso_conf.h.in
-        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-        OUTPUT_FILE crypto/include/internal/dso_conf.h)
-
-    EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} 
-        "-I${CMAKE_CURRENT_LIST_DIR}" -Mconfigdata "util/dofile.pl" "-oMakefile" include/openssl/opensslconf.h.in 
-        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-        OUTPUT_FILE include/openssl/opensslconf.h)
-
-
+        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} 
+            "-I${CMAKE_CURRENT_LIST_DIR}" -Mconfigdata "util/dofile.pl" "-oMakefile" include/openssl/opensslconf.h.in 
+            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+            OUTPUT_FILE include/openssl/opensslconf.h
+            ERROR_VARIABLE error)
+        if(error)
+            MESSAGE(FATAL_ERROR(${error}))
+        endif(error)
 
     set(PLs crypto/aes/asm/aesni-mb-x86_64.pl crypto/aes/asm/aesni-sha1-x86_64.pl crypto/aes/asm/aesni-sha256-x86_64.pl crypto/aes/asm/aesni-x86_64.pl crypto/aes/asm/vpaes-x86_64.pl crypto/bn/asm/rsaz-avx2.pl crypto/bn/asm/rsaz-x86_64.pl crypto/bn/asm/x86_64-gf2m.pl crypto/bn/asm/x86_64-mont.pl crypto/bn/asm/x86_64-mont5.pl crypto/camellia/asm/cmll-x86_64.pl crypto/chacha/asm/chacha-x86_64.pl crypto/ec/asm/ecp_nistz256-x86_64.pl crypto/ec/asm/x25519-x86_64.pl crypto/md5/asm/md5-x86_64.pl crypto/modes/asm/aesni-gcm-x86_64.pl crypto/modes/asm/ghash-x86_64.pl crypto/poly1305/asm/poly1305-x86_64.pl crypto/rc4/asm/rc4-md5-x86_64.pl crypto/rc4/asm/rc4-x86_64.pl crypto/sha/asm/keccak1600-x86_64.pl crypto/sha/asm/sha1-mb-x86_64.pl crypto/sha/asm/sha1-x86_64.pl crypto/sha/asm/sha256-mb-x86_64.pl crypto/sha/asm/sha512-x86_64.pl crypto/sha/asm/sha512-x86_64.pl crypto/whrlpool/asm/wp-x86_64.pl crypto/x86_64cpuid.pl engines/asm/e_padlock-x86_64.pl)
     set(ASMs crypto/aes/aesni-mb-x86_64.s crypto/aes/aesni-sha1-x86_64.s crypto/aes/aesni-sha256-x86_64.s crypto/aes/aesni-x86_64.s crypto/aes/vpaes-x86_64.s crypto/bn/rsaz-avx2.s crypto/bn/rsaz-x86_64.s crypto/bn/x86_64-gf2m.s crypto/bn/x86_64-mont.s crypto/bn/x86_64-mont5.s crypto/camellia/cmll-x86_64.s crypto/chacha/chacha-x86_64.s crypto/ec/ecp_nistz256-x86_64.s crypto/ec/x25519-x86_64.s crypto/md5/md5-x86_64.s crypto/modes/aesni-gcm-x86_64.s crypto/modes/ghash-x86_64.s crypto/poly1305/poly1305-x86_64.s crypto/rc4/rc4-md5-x86_64.s crypto/rc4/rc4-x86_64.s crypto/sha/keccak1600-x86_64.s crypto/sha/sha1-mb-x86_64.s crypto/sha/sha1-x86_64.s crypto/sha/sha256-mb-x86_64.s crypto/sha/sha256-x86_64.s crypto/sha/sha512-x86_64.s crypto/whrlpool/wp-x86_64.s crypto/x86_64cpuid.s engines/e_padlock-x86_64.s)
@@ -819,7 +833,11 @@ elseif(CMAKE_OSX_SYSROOT MATCHES iPhoneOS)
             ${pl} ios64 ${asm}
             WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
             OUTPUT_VARIABLE temp
+            ERROR_VARIABLE error
         )
+        IF(error)
+            MESSAGE(FATAL_ERROR(${error}))
+        ENDIF(error)
     endforeach()
     SET(ssl_SRCS
     ssl/t1_enc.c
@@ -2272,7 +2290,7 @@ elseif(ANDROID)
         list(GET PLs ${idx} pl)
         list(GET ASMs ${idx} asm)
 
-        MESSAGE("Running "${pl}" to get "${asm}"")
+        MESSAGE("Running \"${pl}\" to get \"${asm}\"")
         EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE}
             ${pl} android -fPIC -pthread  -target i686-linux-android -Wa,--noexecstack -Qunused-arguments -Wall -O3 -fomit-frame-pointer -DOPENSSL_USE_NODELETE -DOPENSSL_PIC -DOPENSSL_CPUID_OBJ -DOPENSSL_BN_ASM_PART_WORDS -DOPENSSL_IA32_SSE2 -DOPENSSL_BN_ASM_MONT -DOPENSSL_BN_ASM_GF2m -DSHA1_ASM -DSHA256_ASM -DSHA512_ASM -DRC4_ASM -DMD5_ASM -DRMD160_ASM -DVPAES_ASM -DWHIRLPOOL_ASM -DGHASH_ASM -DECP_NISTZ256_ASM -DPOLY1305_ASM -DOPENSSLDIR="/usr/local/ssl" -DENGINESDIR="/usr/local/lib/engines-1.1" -DNDEBUG   ${asm}
             WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
@@ -3007,7 +3025,7 @@ elseif(ANDROID)
         list(GET PLs ${idx} pl)
         list(GET ASMs ${idx} asm)
 
-        MESSAGE("Running "${pl}" to get "${asm}"")
+        MESSAGE("Running \"${pl}\" to get \"${asm}\" in ${CMAKE_CURRENT_LIST_DIR}")
         EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE}
             ${pl} void ${asm}
             WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
@@ -3726,6 +3744,8 @@ elseif(ANDROID)
     TARGET_COMPILE_OPTIONS(crypto PRIVATE -Qunused-arguments -pthread  -Wa,--noexecstack -fPIC) 
 ELSEIF(${ANDROID_ABI} STREQUAL "arm64-v8a")
         set(arch "android-arm64")
+
+        FIND_PROGRAM(PERL_EXECUTABLE perl)
         MESSAGE("Configuring configdata.pm  for \"${arch}\"")
         EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE}
             Configure ${arch}
@@ -3742,7 +3762,7 @@ ELSEIF(${ANDROID_ABI} STREQUAL "arm64-v8a")
             list(GET PLs ${idx} pl)
             list(GET ASMs ${idx} asm)
 
-            MESSAGE("Running "${pl}" to get "${asm}"")
+            MESSAGE("Running \"${pl}\" to get \"${asm}\"")
             EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE}
                 ${pl} linux64 ${asm}
                 WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
@@ -4459,14 +4479,19 @@ ELSEIF(${ANDROID_ABI} STREQUAL "arm64-v8a")
         TARGET_COMPILE_OPTIONS(crypto PRIVATE -fPIC -Wall -Qunused-arguments -Wa,--noexecstack -pthread -O3 )
     
     endif() #arm64
-elseif (SYSROOT_LOWER MATCHES "iphoneos" OR SYSROOT_LOWER MATCHES "iphonesimulator")
-    MESSAGE(FATAL_ERROR("iOS is not currently supported"))
 elseif(WIN32)
     MESSAGE(FATAL_ERROR("Windows is not currently supported"))
 elseif(UNIX)
     MESSAGE("Generating for Linux clang x86_64")
 
     FIND_PROGRAM(PERL_EXECUTABLE perl)
+
+    set(arch linux-x86_64-clang)
+    MESSAGE("Configuring configdata.pm  for \"${arch}\"")
+    EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} Configure ${arch}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+            OUTPUT_VARIABLE TEMP
+        )
 
     set(PLs crypto/aes/asm/aesni-mb-x86_64.pl crypto/aes/asm/aesni-sha1-x86_64.pl crypto/aes/asm/aesni-sha256-x86_64.pl crypto/aes/asm/aesni-x86_64.pl crypto/aes/asm/vpaes-x86_64.pl crypto/bn/asm/rsaz-avx2.pl crypto/bn/asm/rsaz-x86_64.pl crypto/bn/asm/x86_64-gf2m.pl crypto/bn/asm/x86_64-mont.pl crypto/bn/asm/x86_64-mont5.pl crypto/camellia/asm/cmll-x86_64.pl crypto/chacha/asm/chacha-x86_64.pl crypto/ec/asm/ecp_nistz256-x86_64.pl crypto/ec/asm/x25519-x86_64.pl crypto/md5/asm/md5-x86_64.pl crypto/modes/asm/aesni-gcm-x86_64.pl crypto/modes/asm/ghash-x86_64.pl crypto/poly1305/asm/poly1305-x86_64.pl crypto/rc4/asm/rc4-md5-x86_64.pl crypto/rc4/asm/rc4-x86_64.pl crypto/sha/asm/keccak1600-x86_64.pl crypto/sha/asm/sha1-mb-x86_64.pl crypto/sha/asm/sha1-x86_64.pl crypto/sha/asm/sha256-mb-x86_64.pl crypto/sha/asm/sha512-x86_64.pl crypto/sha/asm/sha512-x86_64.pl crypto/whrlpool/asm/wp-x86_64.pl crypto/x86_64cpuid.pl engines/asm/e_padlock-x86_64.pl)
     set(ASMs crypto/aes/aesni-mb-x86_64.s crypto/aes/aesni-sha1-x86_64.s crypto/aes/aesni-sha256-x86_64.s crypto/aes/aesni-x86_64.s crypto/aes/vpaes-x86_64.s crypto/bn/rsaz-avx2.s crypto/bn/rsaz-x86_64.s crypto/bn/x86_64-gf2m.s crypto/bn/x86_64-mont.s crypto/bn/x86_64-mont5.s crypto/camellia/cmll-x86_64.s crypto/chacha/chacha-x86_64.s crypto/ec/ecp_nistz256-x86_64.s crypto/ec/x25519-x86_64.s crypto/md5/md5-x86_64.s crypto/modes/aesni-gcm-x86_64.s crypto/modes/ghash-x86_64.s crypto/poly1305/poly1305-x86_64.s crypto/rc4/rc4-md5-x86_64.s crypto/rc4/rc4-x86_64.s crypto/sha/keccak1600-x86_64.s crypto/sha/sha1-mb-x86_64.s crypto/sha/sha1-x86_64.s crypto/sha/sha256-mb-x86_64.s crypto/sha/sha256-x86_64.s crypto/sha/sha512-x86_64.s crypto/whrlpool/wp-x86_64.s crypto/x86_64cpuid.s engines/e_padlock-x86_64.s)
