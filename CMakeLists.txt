@@ -1037,7 +1037,7 @@ elseif(ANDROID)
         message("Building ${arch}")
         
         file(COPY android/${arch}/opensslconf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/include/openssl/)
-        file(COPY android/${arch}/bn_conf.h android/${arch}/dso_conf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/include/internal/openssl/)
+        file(COPY android/${arch}/bn_conf.h android/${arch}/dso_conf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/include/internal/)
         file(COPY android/${arch}/buildinf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/)
             
         SET(ssl_SRCS
@@ -1075,7 +1075,7 @@ elseif(ANDROID)
             set(arch "android-x86")
             message("Building ${arch}")
             file(COPY android/${arch}/opensslconf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/include/openssl/)
-            file(COPY android/${arch}/bn_conf.h android/${arch}/dso_conf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/include/internal/openssl/)
+            file(COPY android/${arch}/bn_conf.h android/${arch}/dso_conf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/include/internal/)
             file(COPY android/${arch}/buildinf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/)
 
             SET(ssl_SRCS
@@ -1114,7 +1114,7 @@ elseif(ANDROID)
         message("Building ${arch}")
         
         file(COPY android/${arch}/opensslconf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/include/openssl/)
-        file(COPY android/${arch}/bn_conf.h android/${arch}/dso_conf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/include/internal/openssl/)
+        file(COPY android/${arch}/bn_conf.h android/${arch}/dso_conf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/include/internal/)
         file(COPY android/${arch}/buildinf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/)
             
         SET(ssl_SRCS
@@ -1153,7 +1153,7 @@ elseif(ANDROID)
         message("Building ${arch}")
         
         file(COPY android/${arch}/opensslconf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/include/openssl/)
-        file(COPY android/${arch}/bn_conf.h android/${arch}/dso_conf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/include/internal/openssl/)
+        file(COPY android/${arch}/bn_conf.h android/${arch}/dso_conf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/include/internal/)
         file(COPY android/${arch}/buildinf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/)
             
         SET(ssl_SRCS
