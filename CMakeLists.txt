@@ -1,5 +1,136 @@
 cmake_minimum_required(VERSION 3.14)
 project(open_ssl C ASM)
+
+
+SET(COMMON_ssl_SRCS
+    ssl/statem/statem_clnt.c ssl/pqueue.c
+    ssl/record/rec_layer_s3.c ssl/bio_ssl.c
+    ssl/statem/extensions_srvr.c ssl/statem/statem_lib.c
+    ssl/t1_trce.c ssl/ssl_stat.c
+    ssl/s3_cbc.c ssl/methods.c
+    ssl/ssl_lib.c ssl/ssl_err.c
+    ssl/t1_enc.c ssl/ssl_asn1.c
+    ssl/packet.c ssl/ssl_cert.c
+    ssl/record/ssl3_record.c ssl/s3_msg.c
+    ssl/record/dtls1_bitmap.c ssl/d1_msg.c
+    ssl/statem/extensions_cust.c ssl/statem/statem_srvr.c
+    ssl/d1_srtp.c ssl/ssl_sess.c
+    ssl/statem/extensions_clnt.c ssl/ssl_rsa.c
+    ssl/record/ssl3_buffer.c ssl/ssl_init.c
+    ssl/record/ssl3_record_tls13.c ssl/record/rec_layer_d1.c
+    ssl/statem/extensions.c ssl/statem/statem_dtls.c
+    ssl/statem/statem.c ssl/ssl_conf.c
+    ssl/tls13_enc.c ssl/ssl_mcnf.c
+    ssl/ssl_txt.c ssl/t1_lib.c
+    ssl/d1_lib.c ssl/ssl_ciph.c
+    ssl/ssl_utst.c ssl/s3_enc.c
+    ssl/s3_lib.c ssl/tls_srp.c
+    )
+SET(COMMON_crypto_SRCS
+    crypto/evp/evp_lib.c crypto/x509/x509_trs.c crypto/asn1/a_type.c crypto/bn/bn_srp.c crypto/bio/b_addr.c crypto/store/store_strings.c
+    crypto/rand/rand_err.c crypto/ocsp/v3_ocsp.c crypto/rand/rand_win.c crypto/x509/x509name.c crypto/siphash/siphash_ameth.c crypto/pkcs12/p12_p8d.c
+    crypto/x509/by_dir.c crypto/x509v3/pcy_lib.c crypto/srp/srp_vfy.c crypto/evp/p_lib.c crypto/cms/cms_kari.c crypto/evp/p_dec.c
+    crypto/x509/x_crl.c crypto/md4/md4_one.c crypto/asn1/a_d2i_fp.c crypto/asn1/a_sign.c crypto/o_fips.c crypto/asn1/tasn_typ.c
+    crypto/rsa/rsa_meth.c crypto/dh/dh_asn1.c crypto/evp/m_mdc2.c crypto/async/async_wait.c crypto/dsa/dsa_err.c crypto/asn1/t_bitst.c
+    crypto/mdc2/mdc2dgst.c crypto/dsa/dsa_ameth.c crypto/x509v3/pcy_tree.c crypto/ts/ts_lib.c crypto/bn/bn_x931p.c crypto/x509/t_crl.c
+    crypto/evp/p_seal.c crypto/dh/dh_depr.c crypto/evp/c_alld.c crypto/bn/bn_prime.c crypto/bn/bn_mpi.c crypto/dh/dh_gen.c
+    crypto/x509/x_pubkey.c crypto/ct/ct_vfy.c crypto/cast/c_skey.c crypto/sha/sha1_one.c crypto/bn/bn_add.c crypto/cms/cms_cd.c
+    crypto/blake2/m_blake2s.c crypto/ec/curve448/curve448.c crypto/async/async.c crypto/asn1/tasn_dec.c crypto/pkcs12/p12_init.c crypto/whrlpool/wp_dgst.c
+    crypto/x509/x509_d2.c crypto/ec/curve448/f_generic.c crypto/rc2/rc2_cbc.c crypto/ts/ts_asn1.c crypto/des/cfb_enc.c crypto/cmac/cmac.c
+    crypto/dh/dh_pmeth.c crypto/bn/bn_div.c crypto/x509/x509_ext.c crypto/ct/ct_log.c crypto/evp/encode.c crypto/asn1/a_gentm.c
+    crypto/o_time.c crypto/bio/b_print.c crypto/ec/eck_prn.c crypto/evp/e_seed.c crypto/rand/randfile.c crypto/x509v3/v3_extku.c
+    crypto/bio/bss_sock.c crypto/ec/ec_cvt.c crypto/ex_data.c crypto/bn/bn_const.c crypto/evp/bio_md.c crypto/x509v3/v3err.c
+    crypto/modes/xts128.c crypto/x509/x509_def.c crypto/asn1/i2d_pr.c crypto/pkcs12/p12_kiss.c crypto/evp/e_aes.c crypto/cast/c_ofb64.c
+    crypto/o_str.c crypto/asn1/x_int64.c crypto/rsa/rsa_prn.c crypto/x509v3/v3_akeya.c crypto/ec/curve448/scalar.c crypto/x509v3/v3_lib.c
+    crypto/rsa/rsa_depr.c crypto/pem/pem_xaux.c crypto/asn1/asn1_item_list.c crypto/evp/p5_crpt2.c crypto/dh/dh_prn.c crypto/x509v3/v3_conf.c
+    crypto/evp/evp_pbe.c crypto/asn1/f_string.c crypto/ts/ts_rsp_print.c crypto/asn1/tasn_new.c crypto/objects/obj_dat.c crypto/evp/m_sha1.c
+    crypto/modes/wrap128.c crypto/asn1/a_mbstr.c crypto/cmac/cm_ameth.c crypto/ec/ecp_nistp256.c crypto/evp/digest.c crypto/comp/comp_lib.c
+    crypto/evp/p_enc.c crypto/pem/pem_pk8.c crypto/rsa/rsa_sign.c crypto/evp/p5_crpt.c crypto/ec/ec_pmeth.c crypto/idea/i_ecb.c
+    crypto/bf/bf_ecb.c crypto/pkcs12/p12_crpt.c crypto/evp/e_rc2.c crypto/cms/cms_enc.c crypto/asn1/i2d_pu.c crypto/md4/md4_dgst.c
+    crypto/evp/e_aes_cbc_hmac_sha1.c crypto/bn/bn_rand.c crypto/x509v3/v3_tlsf.c crypto/des/cbc_cksm.c crypto/kdf/scrypt.c crypto/lhash/lhash.c
+    crypto/evp/e_bf.c crypto/ec/ec_oct.c crypto/evp/m_md5_sha1.c crypto/x509/x509_v3.c crypto/dso/dso_dl.c crypto/evp/m_md5.c
+    crypto/cast/c_ecb.c crypto/hmac/hm_ameth.c crypto/ec/ecx_meth.c crypto/x509/x509_lu.c crypto/bn/bn_lib.c crypto/pkcs12/p12_p8e.c
+    crypto/asn1/x_bignum.c crypto/bn/bn_ctx.c crypto/asn1/asn_mime.c crypto/asn1/a_time.c crypto/camellia/cmll_cfb.c crypto/async/async_err.c
+    crypto/cryptlib.c crypto/idea/i_ofb64.c crypto/ct/ct_b64.c crypto/x509v3/v3_crld.c crypto/rsa/rsa_crpt.c crypto/pkcs12/p12_decr.c
+    crypto/ec/ec_curve.c crypto/ec/curve448/arch_32/f_impl.c crypto/seed/seed_ecb.c crypto/pem/pem_pkey.c crypto/dh/dh_rfc7919.c crypto/asn1/a_strex.c
+    crypto/txt_db/txt_db.c crypto/ts/ts_rsp_verify.c crypto/rand/rand_egd.c crypto/err/err_prn.c crypto/ec/ecdsa_sign.c crypto/bio/bio_cb.c
+    crypto/x509v3/v3_skey.c crypto/des/ofb64ede.c crypto/evp/evp_err.c crypto/err/err.c crypto/asn1/asn_pack.c crypto/cms/cms_err.c
+    crypto/asn1/ameth_lib.c crypto/cms/cms_att.c crypto/rsa/rsa_x931g.c crypto/des/xcbc_enc.c crypto/dsa/dsa_lib.c crypto/objects/obj_xref.c
+    crypto/asn1/asn_moid.c crypto/bn/bn_kron.c crypto/async/arch/async_null.c crypto/evp/p_open.c crypto/rsa/rsa_oaep.c crypto/camellia/cmll_ofb.c
+    crypto/des/ofb_enc.c crypto/evp/pbe_scrypt.c crypto/x509v3/pcy_cache.c crypto/o_dir.c crypto/ec/ecp_smpl.c crypto/modes/ocb128.c
+    crypto/dsa/dsa_prn.c crypto/evp/e_idea.c crypto/bn/bn_shift.c crypto/modes/ccm128.c crypto/dh/dh_meth.c crypto/objects/obj_err.c
+    crypto/rsa/rsa_pmeth.c crypto/siphash/siphash_pmeth.c crypto/asn1/a_verify.c crypto/rsa/rsa_saos.c crypto/ct/ct_x509v3.c crypto/x509v3/pcy_map.c
+    crypto/asn1/tasn_prn.c crypto/evp/e_des3.c crypto/evp/e_sm4.c crypto/x509v3/v3_alt.c crypto/bn/bn_exp.c crypto/evp/m_md4.c
+    crypto/dh/dh_lib.c crypto/des/ofb64enc.c crypto/bn/bn_mont.c crypto/dh/dh_ameth.c crypto/lhash/lh_stats.c crypto/rand/drbg_ctr.c
+    crypto/bn/bn_dh.c crypto/bn/bn_word.c crypto/ec/ec_check.c crypto/x509v3/v3_int.c crypto/mdc2/mdc2_one.c crypto/x509v3/v3_pmaps.c
+    crypto/x509/x_attrib.c crypto/x509/x_exten.c crypto/ts/ts_verify_ctx.c crypto/pkcs12/p12_attr.c crypto/evp/e_camellia.c crypto/evp/c_allc.c
+    crypto/des/ecb_enc.c crypto/pem/pem_lib.c crypto/ts/ts_rsp_utils.c crypto/camellia/cmll_ctr.c crypto/modes/cbc128.c crypto/asn1/a_bitstr.c
+    crypto/ocsp/ocsp_ht.c crypto/x509v3/v3_bitst.c crypto/poly1305/poly1305_pmeth.c crypto/des/ecb3_enc.c crypto/init.c crypto/ocsp/ocsp_asn.c
+    crypto/x509/x509_vfy.c crypto/bn/bn_sqr.c crypto/ec/ecdsa_vrf.c crypto/evp/m_sha3.c crypto/bio/bf_null.c crypto/dh/dh_rfc5114.c
+    crypto/sm3/sm3.c crypto/dso/dso_lib.c crypto/store/store_init.c crypto/des/rand_key.c crypto/threads_none.c crypto/rsa/rsa_mp.c
+    crypto/sha/sha1dgst.c crypto/asn1/d2i_pu.c crypto/blake2/blake2b.c crypto/asn1/x_sig.c crypto/pkcs7/pkcs7err.c crypto/aes/aes_wrap.c
+    crypto/x509v3/v3_pcons.c crypto/dsa/dsa_key.c crypto/rsa/rsa_pk1.c crypto/pem/pem_sign.c crypto/ctype.c crypto/pkcs7/pk7_mime.c
+    crypto/cms/cms_io.c crypto/x509v3/v3_pcia.c crypto/ocsp/ocsp_cl.c crypto/bio/bss_null.c crypto/modes/ofb128.c crypto/cms/cms_env.c
+    crypto/rsa/rsa_err.c crypto/x509v3/v3_prn.c crypto/rc2/rc2ofb64.c crypto/cms/cms_lib.c crypto/x509v3/v3_pku.c crypto/dsa/dsa_vrf.c
+    crypto/evp/evp_cnf.c crypto/x509/x_x509.c crypto/pkcs7/pk7_doit.c crypto/evp/e_aes_cbc_hmac_sha256.c crypto/conf/conf_mall.c crypto/x509/x_x509a.c
+    crypto/asn1/t_pkey.c crypto/threads_pthread.c crypto/x509/x_name.c crypto/asn1/bio_ndef.c crypto/asn1/bio_asn1.c crypto/conf/conf_lib.c
+    crypto/bn/bn_sqrt.c crypto/asn1/tasn_utl.c crypto/bn/bn_blind.c crypto/ec/curve25519.c crypto/bio/bio_meth.c crypto/x509/x509_att.c
+    crypto/evp/cmeth_lib.c crypto/pkcs12/pk12err.c crypto/bio/b_sock.c crypto/hmac/hmac.c crypto/ec/ecp_mont.c crypto/asn1/p5_pbe.c
+    crypto/bio/bss_log.c crypto/x509/x509_req.c crypto/store/store_err.c crypto/rsa/rsa_ossl.c crypto/sm2/sm2_sign.c crypto/kdf/kdf_err.c
+    crypto/dso/dso_openssl.c crypto/seed/seed_cbc.c crypto/bio/b_dump.c crypto/pkcs12/p12_utl.c crypto/x509/x509spki.c crypto/x509/x509_set.c
+    crypto/pkcs12/p12_sbag.c crypto/asn1/asn_mstbl.c crypto/ec/ecdsa_ossl.c crypto/sm4/sm4.c crypto/dh/dh_kdf.c crypto/store/store_lib.c
+    crypto/mem_sec.c crypto/conf/conf_mod.c crypto/asn1/a_strnid.c crypto/des/cbc_enc.c crypto/ec/ecp_nistputil.c crypto/ec/ec_print.c
+    crypto/x509/x509type.c crypto/bio/b_sock2.c crypto/rsa/rsa_ameth.c crypto/aes/aes_misc.c crypto/o_fopen.c crypto/bf/bf_cfb64.c
+    crypto/x509v3/v3_admis.c crypto/md5/md5_one.c crypto/x509/x509_txt.c crypto/x509/x509rset.c crypto/asn1/evp_asn1.c crypto/asn1/nsseq.c
+    crypto/bn/bn_exp2.c crypto/pkcs7/pk7_lib.c crypto/evp/pmeth_lib.c crypto/bio/bss_bio.c crypto/aes/aes_cbc.c crypto/cmac/cm_pmeth.c
+    crypto/asn1/a_digest.c crypto/evp/m_ripemd.c crypto/poly1305/poly1305.c crypto/evp/names.c crypto/aes/aes_ofb.c crypto/camellia/cmll_ecb.c
+    crypto/threads_win.c crypto/x509v3/v3_addr.c crypto/x509/x509_r2x.c crypto/evp/evp_pkey.c crypto/x509/x_req.c crypto/dso/dso_win32.c
+    crypto/bn/bn_depr.c crypto/rsa/rsa_chk.c crypto/x509v3/v3_bcons.c crypto/evp/e_rc4.c crypto/evp/pmeth_fn.c crypto/evp/m_wp.c
+    crypto/pkcs12/p12_key.c crypto/poly1305/poly1305_ameth.c crypto/buffer/buffer.c crypto/asn1/a_i2d_fp.c crypto/bio/bio_lib.c crypto/asn1/a_utf8.c
+    crypto/x509/x509cset.c crypto/rc2/rc2_ecb.c crypto/asn1/d2i_pr.c crypto/ts/ts_rsp_sign.c crypto/ec/ec_asn1.c crypto/sm3/m_sm3.c
+    crypto/cms/cms_ess.c crypto/des/cfb64ede.c crypto/evp/e_rc5.c crypto/x509v3/v3_ia5.c crypto/x509v3/v3_enum.c crypto/asn1/x_algor.c
+    crypto/rsa/rsa_pss.c crypto/pem/pem_oth.c crypto/x509/x_all.c crypto/rsa/rsa_asn1.c crypto/x509v3/v3_utl.c crypto/ct/ct_err.c
+    crypto/bn/bn_gf2m.c crypto/ui/ui_null.c crypto/ec/ecp_oct.c crypto/dsa/dsa_meth.c crypto/asn1/asn1_lib.c crypto/rc2/rc2_skey.c
+    crypto/ebcdic.c crypto/idea/i_cbc.c crypto/ec/ec_ameth.c crypto/asn1/a_print.c crypto/ec/ec_err.c crypto/modes/gcm128.c
+    crypto/sm2/sm2_pmeth.c crypto/ec/ecp_nistp521.c crypto/asn1/t_spki.c crypto/modes/cfb128.c crypto/pkcs12/p12_add.c crypto/ocsp/ocsp_srv.c
+    crypto/ec/ec_lib.c crypto/des/qud_cksm.c crypto/asn1/p5_pbev2.c crypto/objects/obj_lib.c crypto/ec/curve448/eddsa.c crypto/x509v3/pcy_data.c
+    crypto/ct/ct_oct.c crypto/comp/comp_err.c crypto/modes/cts128.c crypto/x509/t_x509.c crypto/srp/srp_lib.c crypto/x509v3/v3_asid.c
+    crypto/evp/m_md2.c crypto/stack/stack.c crypto/bio/bf_buff.c crypto/evp/bio_b64.c crypto/evp/e_old.c crypto/x509v3/pcy_node.c
+    crypto/ripemd/rmd_dgst.c crypto/pkcs12/p12_crt.c crypto/rsa/rsa_ssl.c crypto/rsa/rsa_gen.c crypto/evp/e_des.c crypto/objects/o_names.c
+    crypto/asn1/asn1_par.c crypto/blake2/blake2s.c crypto/evp/e_xcbc_d.c crypto/dso/dso_err.c crypto/rand/rand_lib.c crypto/asn1/x_info.c
+    crypto/pkcs7/bio_pk7.c crypto/ts/ts_req_print.c crypto/mem_dbg.c crypto/sm2/sm2_crypt.c crypto/dso/dso_dlfcn.c crypto/kdf/hkdf.c
+    crypto/err/err_all.c crypto/x509v3/v3_ncons.c crypto/ts/ts_conf.c crypto/cpt_err.c crypto/ui/ui_openssl.c crypto/pem/pem_all.c
+    crypto/asn1/x_pkey.c crypto/bio/bio_err.c crypto/pkcs7/pk7_attr.c crypto/idea/i_cfb64.c crypto/asn1/a_octet.c crypto/ct/ct_sct.c
+    crypto/modes/ctr128.c crypto/ct/ct_sct_ctx.c crypto/asn1/asn1_err.c crypto/asn1/a_dup.c crypto/pem/pem_x509.c crypto/asn1/x_val.c
+    crypto/pkcs12/p12_asn.c crypto/x509v3/v3_info.c crypto/rand/drbg_lib.c crypto/ec/ecp_nist.c crypto/siphash/siphash.c crypto/des/set_key.c
+    crypto/x509v3/v3_genn.c crypto/rsa/rsa_lib.c crypto/evp/e_rc4_hmac_md5.c crypto/asn1/p5_scrypt.c crypto/bf/bf_ofb64.c crypto/des/cfb64enc.c
+    crypto/store/loader_file.c crypto/ec/ec2_oct.c crypto/sha/sha256.c crypto/des/pcbc_enc.c crypto/bn/bn_recp.c crypto/async/arch/async_posix.c
+    crypto/rc2/rc2cfb64.c crypto/x509/t_req.c crypto/bn/bn_print.c crypto/o_init.c crypto/async/arch/async_win.c crypto/cms/cms_dd.c
+    crypto/conf/conf_ssl.c crypto/mem.c crypto/rsa/rsa_none.c crypto/aria/aria.c crypto/pem/pem_info.c crypto/dsa/dsa_gen.c
+    crypto/des/fcrypt.c crypto/pkcs7/pk7_smime.c crypto/ct/ct_policy.c crypto/evp/pmeth_gn.c crypto/conf/conf_sap.c crypto/getenv.c
+    crypto/x509v3/v3_cpols.c crypto/x509v3/v3_pci.c crypto/dh/dh_err.c crypto/evp/e_aria.c crypto/ec/ecdh_kdf.c crypto/bf/bf_skey.c
+    crypto/ec/curve448/curve448_tables.c crypto/ct/ct_prn.c crypto/aes/aes_cfb.c crypto/x509/x509_obj.c crypto/ocsp/ocsp_vfy.c crypto/dsa/dsa_asn1.c
+    crypto/idea/i_skey.c crypto/x509v3/v3_akey.c crypto/bn/bn_mul.c crypto/x509/by_file.c crypto/x509/x509_meth.c crypto/ec/ec2_smpl.c
+    crypto/dsa/dsa_ossl.c crypto/sm2/sm2_err.c crypto/dsa/dsa_depr.c crypto/evp/evp_enc.c crypto/asn1/f_int.c crypto/ec/ecp_nistp224.c
+    crypto/ec/ecdh_ossl.c crypto/aes/aes_ecb.c crypto/bio/bss_dgram.c crypto/blake2/m_blake2b.c crypto/x509v3/v3_purp.c crypto/hmac/hm_pmeth.c
+    crypto/evp/e_null.c crypto/bn/bn_intern.c crypto/buffer/buf_err.c crypto/asn1/a_object.c crypto/uid.c crypto/x509/x509_cmp.c
+    crypto/x509v3/v3_sxnet.c crypto/dsa/dsa_sign.c crypto/dso/dso_vms.c crypto/rsa/rsa_x931.c crypto/evp/m_null.c crypto/pkcs12/p12_mutl.c
+    crypto/evp/bio_enc.c crypto/des/str2key.c crypto/seed/seed_ofb.c crypto/pkcs12/p12_npas.c crypto/rand/rand_unix.c crypto/x509/x509_err.c
+    crypto/evp/p_sign.c crypto/asn1/x_spki.c crypto/ui/ui_err.c crypto/pem/pvkfmt.c crypto/rand/rand_vms.c crypto/bn/bn_nist.c
+    crypto/ts/ts_err.c crypto/seed/seed_cfb.c crypto/asn1/n_pkey.c crypto/dsa/dsa_pmeth.c crypto/evp/e_cast.c crypto/asn1/tasn_enc.c
+    crypto/asn1/x_long.c crypto/asn1/p8_pkey.c crypto/asn1/asn1_gen.c crypto/bn/bn_gcd.c crypto/ocsp/ocsp_err.c crypto/ocsp/ocsp_lib.c
+    crypto/bio/bss_acpt.c crypto/bn/bn_mod.c crypto/cast/c_cfb64.c crypto/bio/bss_fd.c crypto/ocsp/ocsp_prn.c crypto/conf/conf_def.c
+    crypto/pkcs7/pk7_asn1.c crypto/asn1/a_int.c crypto/asn1/tasn_scn.c crypto/dh/dh_check.c crypto/bio/bss_mem.c crypto/cms/cms_asn1.c
+    crypto/bio/bss_file.c crypto/aes/aes_ige.c crypto/evp/p_verify.c crypto/ui/ui_lib.c crypto/pem/pem_err.c crypto/md5/md5_dgst.c
+    crypto/bn/bn_err.c crypto/evp/e_chacha20_poly1305.c crypto/ripemd/rmd_one.c crypto/cast/c_enc.c crypto/evp/m_sigver.c crypto/kdf/tls1_prf.c
+    crypto/ui/ui_util.c crypto/conf/conf_api.c crypto/seed/seed.c crypto/dh/dh_key.c crypto/cms/cms_smime.c crypto/x509/x509_vpm.c
+    crypto/evp/bio_ok.c crypto/cversion.c crypto/asn1/a_utctm.c crypto/sha/sha512.c crypto/evp/evp_key.c crypto/bio/bss_conn.c
+    crypto/conf/conf_err.c crypto/store/store_register.c crypto/ts/ts_req_utils.c crypto/bio/bf_nbio.c crypto/ocsp/ocsp_ext.c crypto/comp/c_zlib.c
+    crypto/cms/cms_pwri.c crypto/ec/ec_mult.c crypto/bio/bf_lbuf.c crypto/ec/ec_kmeth.c crypto/ec/ec_key.c crypto/cms/cms_sd.c
+    crypto/asn1/tasn_fre.c
+    )
+
+
 if(CMAKE_OSX_SYSROOT MATCHES iPhoneSimulator)
     
         set(arch "iossimulator-xcrun")
@@ -5233,15 +5364,44 @@ elseif(WIN32)
 elseif(UNIX)
     MESSAGE("Generating for Linux clang x86_64")
 
-    FIND_PROGRAM(PERL_EXECUTABLE perl)
+    set(arch "linux-x86_64-clang")
+    find_program(PERL_EXECUTABLE perl)
+    if(NOT PERL_EXECUTABLE)
+        message(FATAL_ERROR("Perl not found"))
+    endif(NOT PERL_EXECUTABLE)
 
-    set(arch linux-x86_64-clang)
-    MESSAGE("Configuring configdata.pm  for \"${arch}\"")
-    EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} Configure ${arch}
+    message("Configuring configdata.pm for \"${arch}\"")
+    
+    EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} Configure ${arch} 
+
             WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
             OUTPUT_VARIABLE TEMP
-        )
+            ERROR_VARIABLE ERROR
+    )
+    if(ERROR)
+        MESSAGE(FATAL_ERROR("Error while configuring: ${ERROR}"))
+    endif(ERROR)
 
+    EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} util/mkbuildinf.pl "clang -fPIC -pthread -m64 -Wa,--noexecstack -Qunused-arguments -Wall -O3 -DOPENSSL_USE_NODELETE -DL_ENDIAN -DOPENSSL_PIC -DOPENSSL_CPUID_OBJ -DOPENSSL_IA32_SSE2 -DOPENSSL_BN_ASM_MONT -DOPENSSL_BN_ASM_MONT5 -DOPENSSL_BN_ASM_GF2m -DSHA1_ASM -DSHA256_ASM -DSHA512_ASM -DKECCAK1600_ASM -DRC4_ASM -DMD5_ASM -DVPAES_ASM -DGHASH_ASM -DECP_NISTZ256_ASM -DX25519_ASM -DPOLY1305_ASM -DNDEBUG" ""linux-x86_64-clang"" 
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+        OUTPUT_FILE crypto/buildinf.h
+        ERROR_VARIABLE ERROR)
+    if(ERROR)
+        MESSAGE(FATAL_ERROR("Error while generating mkbuildinf: ${ERROR}"))
+    endif(ERROR)
+
+    foreach(el crypto/include/internal/bn_conf.h;crypto/include/internal/dso_conf.h;include/openssl/opensslconf.h)
+        MESSAGE("Generating ${el}")
+        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE}
+            "-I${CMAKE_CURRENT_LIST_DIR}" -Mconfigdata "util/dofile.pl" "-oMakefile" ${el}.in
+            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+            OUTPUT_FILE ${el}
+            ERROR_VARIABLE error)
+        if(error)
+            message(FATAL_ERROR("Error while generating: ${error}"))
+        endif(error)
+    endforeach()
+    
     set(PLs crypto/aes/asm/aesni-mb-x86_64.pl crypto/aes/asm/aesni-sha1-x86_64.pl crypto/aes/asm/aesni-sha256-x86_64.pl crypto/aes/asm/aesni-x86_64.pl crypto/aes/asm/vpaes-x86_64.pl crypto/bn/asm/rsaz-avx2.pl crypto/bn/asm/rsaz-x86_64.pl crypto/bn/asm/x86_64-gf2m.pl crypto/bn/asm/x86_64-mont.pl crypto/bn/asm/x86_64-mont5.pl crypto/camellia/asm/cmll-x86_64.pl crypto/chacha/asm/chacha-x86_64.pl crypto/ec/asm/ecp_nistz256-x86_64.pl crypto/ec/asm/x25519-x86_64.pl crypto/md5/asm/md5-x86_64.pl crypto/modes/asm/aesni-gcm-x86_64.pl crypto/modes/asm/ghash-x86_64.pl crypto/poly1305/asm/poly1305-x86_64.pl crypto/rc4/asm/rc4-md5-x86_64.pl crypto/rc4/asm/rc4-x86_64.pl crypto/sha/asm/keccak1600-x86_64.pl crypto/sha/asm/sha1-mb-x86_64.pl crypto/sha/asm/sha1-x86_64.pl crypto/sha/asm/sha256-mb-x86_64.pl crypto/sha/asm/sha512-x86_64.pl crypto/sha/asm/sha512-x86_64.pl crypto/whrlpool/asm/wp-x86_64.pl crypto/x86_64cpuid.pl engines/asm/e_padlock-x86_64.pl)
     set(ASMs crypto/aes/aesni-mb-x86_64.s crypto/aes/aesni-sha1-x86_64.s crypto/aes/aesni-sha256-x86_64.s crypto/aes/aesni-x86_64.s crypto/aes/vpaes-x86_64.s crypto/bn/rsaz-avx2.s crypto/bn/rsaz-x86_64.s crypto/bn/x86_64-gf2m.s crypto/bn/x86_64-mont.s crypto/bn/x86_64-mont5.s crypto/camellia/cmll-x86_64.s crypto/chacha/chacha-x86_64.s crypto/ec/ecp_nistz256-x86_64.s crypto/ec/x25519-x86_64.s crypto/md5/md5-x86_64.s crypto/modes/aesni-gcm-x86_64.s crypto/modes/ghash-x86_64.s crypto/poly1305/poly1305-x86_64.s crypto/rc4/rc4-md5-x86_64.s crypto/rc4/rc4-x86_64.s crypto/sha/keccak1600-x86_64.s crypto/sha/sha1-mb-x86_64.s crypto/sha/sha1-x86_64.s crypto/sha/sha256-mb-x86_64.s crypto/sha/sha256-x86_64.s crypto/sha/sha512-x86_64.s crypto/whrlpool/wp-x86_64.s crypto/x86_64cpuid.s engines/e_padlock-x86_64.s)
     list(LENGTH PLs _len)
@@ -5254,750 +5414,119 @@ elseif(UNIX)
         EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE}
             ${pl} elf ${asm}
             WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-            OUTPUT_VARIABLE TEMP
+            OUTPUT_VARIABLE temp
+            ERROR_VARIABLE error
         )
+        if(error)
+            message(FATAL_ERROR("Error while generating: ${error}"))
+        endif(error)
     endforeach()
-
-    #TODO: do those automatically
-        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} util/mkbuildinf.pl "clang -fPIC -pthread -m64 -Wa,--noexecstack -Qunused-arguments -Wall -O3 -DOPENSSL_USE_NODELETE -DL_ENDIAN -DOPENSSL_BUILDING_OPENSSL -DOPENSSL_PIC -DNDEBUG" "linux-x86_64-clang" 
-            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-            OUTPUT_FILE crypto/buildinf.h)
-
-        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} 
-            "-I${CMAKE_CURRENT_LIST_DIR}" -Mconfigdata "util/dofile.pl" "-oMakefile" crypto/include/internal/bn_conf.h.in
-            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-            OUTPUT_FILE crypto/include/internal/bn_conf.h)
-
-        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} 
-            "-I${CMAKE_CURRENT_LIST_DIR}" -Mconfigdata "util/dofile.pl" "-oMakefile" crypto/include/internal/dso_conf.h.in
-            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-            OUTPUT_FILE crypto/include/internal/dso_conf.h)
-
-        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} 
-            "-I${CMAKE_CURRENT_LIST_DIR}" -Mconfigdata "util/dofile.pl" "-oMakefile" include/openssl/opensslconf.h.in 
-            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-            OUTPUT_FILE include/openssl/opensslconf.h)
-
+        
     SET(ssl_SRCS
-    ssl/statem/statem_dtls.c
-        ssl/statem/extensions_srvr.c
-        ssl/ssl_sess.c
-        ssl/ssl_err.c
-        ssl/ssl_lib.c
-        ssl/t1_trce.c
-        ssl/s3_lib.c
-        ssl/tls13_enc.c
-        ssl/ssl_asn1.c
-        ssl/statem/statem_lib.c
-        ssl/d1_lib.c
-        ssl/ssl_rsa.c
-        ssl/statem/extensions_cust.c
-        ssl/t1_enc.c
-        ssl/s3_msg.c
-        ssl/s3_enc.c
-        ssl/record/ssl3_record.c
-        ssl/ssl_init.c
-        ssl/d1_srtp.c
-        ssl/ssl_ciph.c
-        ssl/ssl_cert.c
-        ssl/ssl_utst.c
-        ssl/record/rec_layer_s3.c
-        ssl/statem/statem_clnt.c
-        ssl/pqueue.c
-        ssl/s3_cbc.c
-        ssl/methods.c
-        ssl/record/ssl3_record_tls13.c
-        ssl/statem/extensions.c
-        ssl/packet.c
-        ssl/record/ssl3_buffer.c
-        ssl/ssl_mcnf.c
-        ssl/t1_lib.c
-        ssl/tls_srp.c
-        ssl/bio_ssl.c
-        ssl/d1_msg.c
-        ssl/statem/statem.c
-        ssl/statem/extensions_clnt.c
-        ssl/ssl_conf.c
-        ssl/statem/statem_srvr.c
-        ssl/ssl_stat.c
-        ssl/ssl_txt.c
-        ssl/record/rec_layer_d1.c
-        ssl/record/dtls1_bitmap.c
+        ${COMMON_ssl_SRCS}
+        
     )
 
     add_library(ssl STATIC ${ssl_SRCS})
 
     TARGET_INCLUDE_DIRECTORIES(ssl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} include)
-    TARGET_COMPILE_DEFINITIONS(ssl PRIVATE  RC4_ASM SHA512_ASM OPENSSL_BN_ASM_MONT OPENSSL_BN_ASM_GF2m OPENSSLDIR="/usr/local/ssl" OPENSSL_CPUID_OBJ X25519_ASM OPENSSL_PIC KECCAK1600_ASM OPENSSL_BN_ASM_MONT5 NDEBUG ENGINESDIR="/usr/local/lib/engines-1.1" SHA256_ASM VPAES_ASM GHASH_ASM SHA1_ASM L_ENDIAN POLY1305_ASM MD5_ASM OPENSSL_USE_NODELETE OPENSSL_IA32_SSE2 ECP_NISTZ256_ASM)
-    TARGET_COMPILE_OPTIONS(ssl PRIVATE -Qunused-arguments -pthread -Wall -Wa,--noexecstack -m64 -fPIC)
+    TARGET_COMPILE_DEFINITIONS(ssl PRIVATE  ECP_NISTZ256_ASM SHA1_ASM POLY1305_ASM GHASH_ASM ENGINESDIR="/usr/local/lib/engines-1.1" OPENSSL_BN_ASM_MONT5 VPAES_ASM KECCAK1600_ASM L_ENDIAN X25519_ASM NDEBUG OPENSSLDIR="/usr/local/ssl" RC4_ASM MD5_ASM SHA256_ASM OPENSSL_IA32_SSE2 OPENSSL_PIC OPENSSL_BN_ASM_MONT OPENSSL_BN_ASM_GF2m SHA512_ASM OPENSSL_CPUID_OBJ OPENSSL_USE_NODELETE)
+    TARGET_COMPILE_OPTIONS(ssl PRIVATE  -pthread -m64 -Wa,--noexecstack -Qunused-arguments -fPIC)
+    
     SET(crypto_SRCS
-    crypto/dsa/dsa_vrf.c
-        crypto/evp/p5_crpt.c
-        crypto/x509/x509_trs.c
-        crypto/ct/ct_oct.c
-        crypto/ec/ecdh_kdf.c
-        crypto/asn1/d2i_pu.c
-        crypto/pkcs12/p12_add.c
-        crypto/des/rand_key.c
-        crypto/pem/pem_xaux.c
-        crypto/bn/bn_recp.c
-        crypto/dsa/dsa_err.c
-        crypto/des/cfb_enc.c
-        crypto/bf/bf_ecb.c
-        crypto/asn1/a_d2i_fp.c
-        crypto/rand/rand_lib.c
-        crypto/ec/ec_curve.c
-        crypto/evp/m_mdc2.c
-        crypto/sm4/sm4.c
-        crypto/bio/bss_conn.c
-        crypto/asn1/asn_pack.c
-        crypto/err/err.c
-        crypto/x509/x509_def.c
-        crypto/o_fopen.c
-        crypto/rc4/rc4-x86_64.s
-        crypto/whrlpool/wp-x86_64.s
-        crypto/kdf/hkdf.c
-        crypto/engine/tb_dsa.c
-        crypto/evp/cmeth_lib.c
-        crypto/ct/ct_err.c
-        crypto/siphash/siphash_ameth.c
-        crypto/ts/ts_asn1.c
-        crypto/dsa/dsa_prn.c
-        crypto/ec/ecdsa_vrf.c
-        crypto/x509v3/v3_prn.c
-        crypto/dsa/dsa_ameth.c
-        crypto/bn/bn_sqr.c
-        crypto/des/cbc_enc.c
-        crypto/asn1/a_strex.c
-        crypto/asn1/tasn_new.c
-        crypto/evp/p_sign.c
-        crypto/cms/cms_env.c
-        crypto/threads_none.c
-        crypto/comp/comp_err.c
-        crypto/asn1/asn_mstbl.c
-        crypto/x509v3/v3_int.c
-        crypto/idea/i_cfb64.c
-        crypto/rsa/rsa_crpt.c
-        crypto/ec/ec_ameth.c
-        crypto/rsa/rsa_pk1.c
-        crypto/x509/x509name.c
-        crypto/cms/cms_err.c
-        crypto/asn1/bio_ndef.c
-        crypto/rsa/rsa_pmeth.c
-        crypto/seed/seed_ofb.c
-        crypto/bn/bn_add.c
-        crypto/async/async_err.c
-        crypto/x509v3/pcy_cache.c
-        crypto/ripemd/rmd_dgst.c
-        crypto/x509v3/v3_conf.c
-        crypto/ec/ecp_nistp521.c
-        crypto/dso/dso_dl.c
-        crypto/cast/c_skey.c
-        crypto/dsa/dsa_pmeth.c
-        crypto/ec/ecp_nistp224.c
-        crypto/cms/cms_asn1.c
-        crypto/x509/x509cset.c
-        crypto/o_time.c
-        crypto/evp/m_wp.c
-        crypto/bio/bss_file.c
-        crypto/bio/bf_null.c
-        crypto/evp/e_des3.c
-        crypto/evp/m_md5_sha1.c
-        crypto/ocsp/ocsp_lib.c
-        crypto/bn/bn_kron.c
-        crypto/pkcs12/p12_p8e.c
-        crypto/asn1/tasn_prn.c
-        crypto/pkcs12/p12_p8d.c
-        crypto/evp/e_cast.c
-        crypto/x509/x_req.c
-        crypto/async/async.c
-        crypto/x509/by_dir.c
-        crypto/x509v3/pcy_tree.c
-        crypto/modes/cts128.c
-        crypto/store/store_lib.c
-        crypto/bio/bss_fd.c
-        crypto/idea/i_ofb64.c
-        crypto/bn/bn_gf2m.c
-        crypto/bn/rsaz-x86_64.s
-        crypto/asn1/nsseq.c
-        crypto/cms/cms_io.c
-        crypto/ct/ct_log.c
-        crypto/rsa/rsa_gen.c
-        crypto/asn1/i2d_pr.c
-        crypto/x509/x509_v3.c
-        crypto/bn/bn_nist.c
-        crypto/dsa/dsa_meth.c
-        crypto/x86_64cpuid.s
-        crypto/asn1/a_sign.c
-        crypto/rsa/rsa_mp.c
-        crypto/whrlpool/wp_dgst.c
-        crypto/x509v3/v3_ia5.c
-        crypto/err/err_all.c
-        crypto/async/async_wait.c
-        crypto/ec/ec_check.c
-        crypto/evp/e_sm4.c
-        crypto/evp/p_seal.c
-        crypto/des/cfb64ede.c
-        crypto/ui/ui_openssl.c
-        crypto/bn/bn_prime.c
-        crypto/evp/c_alld.c
-        crypto/evp/m_md2.c
-        crypto/x509v3/v3_pcia.c
-        crypto/des/ecb3_enc.c
-        crypto/rsa/rsa_lib.c
-        crypto/rsa/rsa_saos.c
-        crypto/x509/x_all.c
-        crypto/bn/bn_blind.c
-        crypto/asn1/tasn_scn.c
-        crypto/kdf/kdf_err.c
-        crypto/des/ecb_enc.c
-        crypto/o_init.c
-        crypto/o_str.c
-        crypto/rsa/rsa_depr.c
-        crypto/stack/stack.c
-        crypto/x509/x509_att.c
-        crypto/rsa/rsa_x931g.c
-        crypto/txt_db/txt_db.c
-        crypto/evp/e_aes_cbc_hmac_sha256.c
-        crypto/kdf/scrypt.c
-        crypto/err/err_prn.c
-        crypto/rsa/rsa_chk.c
-        crypto/bio/bss_acpt.c
-        crypto/bn/bn_err.c
-        crypto/evp/evp_lib.c
-        crypto/pem/pem_pk8.c
-        crypto/dso/dso_win32.c
-        crypto/pem/pem_x509.c
-        crypto/blake2/blake2s.c
-        crypto/sha/sha1-mb-x86_64.s
-        crypto/des/set_key.c
-        crypto/x509v3/pcy_lib.c
-        crypto/bio/bss_sock.c
-        crypto/ec/ecp_nistz256.c
-        crypto/asn1/x_sig.c
-        crypto/x509/x509_cmp.c
-        crypto/cms/cms_enc.c
-        crypto/bn/x86_64-gf2m.s
-        crypto/ui/ui_lib.c
-        crypto/pem/pvkfmt.c
-        crypto/dh/dh_pmeth.c
-        crypto/x509/x509_err.c
-        crypto/ec/ecx_meth.c
-        crypto/ec/ec_err.c
-        crypto/modes/ccm128.c
-        crypto/asn1/a_digest.c
-        crypto/evp/evp_err.c
-        crypto/ec/ecdsa_sign.c
-        crypto/aes/aes_wrap.c
-        crypto/ec/ec2_smpl.c
-        crypto/aes/aes_cfb.c
-        crypto/ec/ecp_nist.c
-        crypto/bn/rsaz_exp.c
-        crypto/x509v3/v3_alt.c
-        crypto/ocsp/ocsp_cl.c
-        crypto/ripemd/rmd_one.c
-        crypto/evp/m_sha1.c
-        crypto/x509v3/v3_crld.c
-        crypto/evp/m_ripemd.c
-        crypto/cms/cms_kari.c
-        crypto/evp/e_rc4_hmac_md5.c
-        crypto/objects/obj_dat.c
-        crypto/camellia/cmll_cfb.c
-        crypto/pkcs7/pk7_mime.c
-        crypto/store/loader_file.c
-        crypto/ec/ec_lib.c
-        crypto/x509/x509_set.c
-        crypto/des/ofb64ede.c
-        crypto/asn1/a_print.c
-        crypto/rsa/rsa_none.c
-        crypto/ct/ct_policy.c
-        crypto/ebcdic.c
-        crypto/buffer/buffer.c
-        crypto/poly1305/poly1305-x86_64.s
-        crypto/dh/dh_depr.c
-        crypto/des/cfb64enc.c
-        crypto/evp/e_aria.c
-        crypto/des/qud_cksm.c
-        crypto/des/str2key.c
-        crypto/ec/curve448/eddsa.c
-        crypto/engine/tb_rsa.c
-        crypto/rand/randfile.c
-        crypto/seed/seed.c
-        crypto/pkcs12/p12_init.c
-        crypto/bn/bn_mont.c
-        crypto/bn/bn_ctx.c
-        crypto/store/store_strings.c
-        crypto/pkcs12/pk12err.c
-        crypto/rsa/rsa_sign.c
-        crypto/cversion.c
-        crypto/des/fcrypt.c
-        crypto/cms/cms_lib.c
-        crypto/ts/ts_verify_ctx.c
-        crypto/asn1/a_time.c
-        crypto/engine/tb_rand.c
-        crypto/x509/x509type.c
-        crypto/x509v3/v3_addr.c
-        crypto/evp/bio_b64.c
-        crypto/rand/rand_egd.c
-        crypto/asn1/a_object.c
-        crypto/x509/t_crl.c
-        crypto/modes/wrap128.c
-        crypto/bio/b_print.c
-        crypto/ec/ec_asn1.c
-        crypto/ocsp/ocsp_prn.c
-        crypto/conf/conf_def.c
-        crypto/md4/md4_one.c
-        crypto/evp/e_rc4.c
-        crypto/pkcs7/pk7_doit.c
-        crypto/aes/aes_ige.c
-        crypto/evp/encode.c
-        crypto/dh/dh_prn.c
-        crypto/x509v3/v3_akeya.c
-        crypto/x509v3/v3_sxnet.c
-        crypto/pkcs7/bio_pk7.c
-        crypto/ts/ts_rsp_verify.c
-        crypto/sha/keccak1600-x86_64.s
-        crypto/bn/bn_x931p.c
-        crypto/ct/ct_x509v3.c
-        crypto/conf/conf_mall.c
-        crypto/x509v3/v3_lib.c
-        crypto/ec/curve448/f_generic.c
-        crypto/aes/aes_misc.c
-        crypto/des/xcbc_enc.c
-        crypto/evp/evp_pbe.c
-        crypto/modes/gcm128.c
-        crypto/bf/bf_enc.c
-        crypto/ec/ec_oct.c
-        crypto/ctype.c
-        crypto/asn1/asn1_par.c
-        crypto/o_dir.c
-        crypto/rc2/rc2_skey.c
-        crypto/ec/x25519-x86_64.s
-        crypto/seed/seed_cfb.c
-        crypto/asn1/a_gentm.c
-        crypto/dsa/dsa_sign.c
-        crypto/dsa/dsa_gen.c
-        crypto/bn/bn_lib.c
-        crypto/ts/ts_rsp_print.c
-        crypto/engine/eng_pkey.c
-        crypto/x509v3/v3_pmaps.c
-        crypto/asn1/tasn_fre.c
-        crypto/evp/bio_ok.c
-        crypto/x509v3/pcy_node.c
-        crypto/cast/c_cfb64.c
-        crypto/threads_win.c
-        crypto/evp/m_sigver.c
-        crypto/asn1/bio_asn1.c
-        crypto/aes/aes_ecb.c
-        crypto/bn/bn_gcd.c
-        crypto/x509/x509_r2x.c
-        crypto/asn1/asn1_item_list.c
-        crypto/pkcs12/p12_crpt.c
-        crypto/x509v3/v3_pci.c
-        crypto/dh/dh_kdf.c
-        crypto/des/fcrypt_b.c
-        crypto/asn1/i2d_pu.c
-        crypto/rsa/rsa_meth.c
-        crypto/pkcs7/pkcs7err.c
-        crypto/x509/x509_vpm.c
-        crypto/bio/bss_bio.c
-        crypto/ct/ct_vfy.c
-        crypto/engine/tb_eckey.c
-        crypto/conf/conf_sap.c
-        crypto/buffer/buf_err.c
-        crypto/cms/cms_ess.c
-        crypto/asn1/a_utf8.c
-        crypto/camellia/cmll_ofb.c
-        crypto/rsa/rsa_ossl.c
-        crypto/bio/bf_lbuf.c
-        crypto/x509v3/v3_bitst.c
-        crypto/bio/bss_null.c
-        crypto/ec/curve448/scalar.c
-        crypto/bf/bf_skey.c
-        crypto/dso/dso_dlfcn.c
-        crypto/ec/ecp_mont.c
-        crypto/dso/dso_openssl.c
-        crypto/asn1/x_int64.c
-        crypto/asn1/a_strnid.c
-        crypto/ocsp/ocsp_asn.c
-        crypto/sm3/sm3.c
-        crypto/bf/bf_cfb64.c
-        crypto/rc2/rc2_cbc.c
-        crypto/uid.c
-        crypto/asn1/asn1_lib.c
-        crypto/dso/dso_err.c
-        crypto/conf/conf_lib.c
-        crypto/des/ofb_enc.c
-        crypto/blake2/m_blake2s.c
-        crypto/ct/ct_b64.c
-        crypto/rand/rand_vms.c
-        crypto/mem.c
-        crypto/engine/eng_err.c
-        crypto/md5/md5-x86_64.s
-        crypto/evp/evp_enc.c
-        crypto/ec/ec_print.c
-        crypto/x509/x_x509.c
-        crypto/srp/srp_lib.c
-        crypto/objects/obj_xref.c
-        crypto/aes/aesni-mb-x86_64.s
-        crypto/md5/md5_dgst.c
-        crypto/srp/srp_vfy.c
-        crypto/bn/bn_intern.c
-        crypto/store/store_err.c
-        crypto/evp/pbe_scrypt.c
-        crypto/x509v3/pcy_map.c
-        crypto/conf/conf_err.c
-        crypto/ts/ts_req_utils.c
-        crypto/asn1/asn_moid.c
-        crypto/asn1/tasn_utl.c
-        crypto/bio/b_sock.c
-        crypto/pkcs12/p12_key.c
-        crypto/dso/dso_vms.c
-        crypto/ui/ui_err.c
-        crypto/rsa/rsa_asn1.c
-        crypto/lhash/lhash.c
-        crypto/pkcs12/p12_kiss.c
-        crypto/x509/x509rset.c
-        crypto/bn/bn_rand.c
-        crypto/ts/ts_rsp_utils.c
-        crypto/hmac/hm_ameth.c
-        crypto/x509/x_x509a.c
-        crypto/ec/eck_prn.c
-        crypto/conf/conf_mod.c
-        crypto/o_fips.c
-        crypto/evp/c_allc.c
-        crypto/x509v3/v3_pku.c
-        crypto/evp/m_md4.c
-        crypto/asn1/x_spki.c
-        crypto/bn/bn_shift.c
-        crypto/sm2/sm2_sign.c
-        crypto/ec/ecdsa_ossl.c
-        crypto/sha/sha1-x86_64.s
-        crypto/aes/aes_ofb.c
-        crypto/dh/dh_key.c
-        crypto/x509/t_x509.c
-        crypto/asn1/n_pkey.c
-        crypto/bio/bss_dgram.c
-        crypto/sha/sha512-x86_64.s
-        crypto/ui/ui_null.c
-        crypto/ec/ecp_smpl.c
-        crypto/x509v3/v3_genn.c
-        crypto/bn/bn_word.c
-        crypto/objects/obj_err.c
-        crypto/bn/bn_div.c
-        crypto/sm2/sm2_crypt.c
-        crypto/x509v3/v3_tlsf.c
-        crypto/ec/ecp_oct.c
-        crypto/engine/eng_all.c
-        crypto/dso/dso_lib.c
-        crypto/siphash/siphash_pmeth.c
-        crypto/rc2/rc2ofb64.c
-        crypto/bio/bss_log.c
-        crypto/idea/i_cbc.c
-        crypto/cmac/cm_pmeth.c
-        crypto/pem/pem_oth.c
-        crypto/asn1/x_pkey.c
-        crypto/x509v3/v3_ncons.c
-        crypto/pkcs12/p12_asn.c
-        crypto/pkcs12/p12_decr.c
-        crypto/ct/ct_sct.c
-        crypto/evp/e_aes.c
-        crypto/pkcs12/p12_crt.c
-        crypto/cms/cms_att.c
-        crypto/engine/eng_ctrl.c
-        crypto/engine/eng_list.c
-        crypto/bn/bn_dh.c
-        crypto/evp/e_rc5.c
-        crypto/rand/rand_unix.c
-        crypto/x509/x509_req.c
-        crypto/x509/x_exten.c
-        crypto/bio/bf_nbio.c
-        crypto/evp/m_md5.c
-        crypto/dh/dh_check.c
-        crypto/md4/md4_dgst.c
-        crypto/rc2/rc2_ecb.c
-        crypto/asn1/tasn_dec.c
-        crypto/evp/e_rc2.c
-        crypto/ocsp/ocsp_srv.c
-        crypto/dh/dh_err.c
-        crypto/x509v3/v3_purp.c
-        crypto/evp/e_null.c
-        crypto/ec/ecp_nistz256-x86_64.s
-        crypto/bn/bn_mod.c
-        crypto/rsa/rsa_ameth.c
-        crypto/x509v3/v3_cpols.c
-        crypto/comp/comp_lib.c
-        crypto/x509/x509_meth.c
-        crypto/getenv.c
-        crypto/x509/x509_d2.c
-        crypto/x509v3/v3err.c
-        crypto/dh/dh_rfc5114.c
-        crypto/x509/x509_txt.c
-        crypto/pkcs7/pk7_asn1.c
-        crypto/asn1/p5_scrypt.c
-        crypto/asn1/t_spki.c
-        crypto/evp/m_null.c
-        crypto/rsa/rsa_err.c
-        crypto/ec/ec_kmeth.c
-        crypto/mdc2/mdc2dgst.c
-        crypto/ocsp/ocsp_err.c
-        crypto/x509v3/v3_pcons.c
-        crypto/asn1/x_val.c
-        crypto/cms/cms_smime.c
-        crypto/pkcs7/pk7_smime.c
-        crypto/bn/x86_64-mont5.s
-        crypto/evp/e_xcbc_d.c
-        crypto/poly1305/poly1305_ameth.c
-        crypto/asn1/a_i2d_fp.c
-        crypto/asn1/f_int.c
-        crypto/evp/m_sha3.c
-        crypto/asn1/tasn_typ.c
-        crypto/evp/e_camellia.c
-        crypto/threads_pthread.c
-        crypto/sm2/sm2_err.c
-        crypto/bio/bio_err.c
-        crypto/bn/bn_mul.c
-        crypto/asn1/asn1_err.c
-        crypto/poly1305/poly1305.c
-        crypto/objects/obj_lib.c
-        crypto/store/store_register.c
-        crypto/ec/ecp_nistp256.c
-        crypto/asn1/a_octet.c
-        crypto/bn/bn_srp.c
-        crypto/dsa/dsa_lib.c
-        crypto/evp/p5_crpt2.c
-        crypto/sha/sha256-x86_64.s
-        crypto/x509/t_req.c
-        crypto/engine/eng_rdrand.c
-        crypto/evp/e_des.c
-        crypto/siphash/siphash.c
-        crypto/x509v3/v3_enum.c
-        crypto/cms/cms_cd.c
-        crypto/asn1/a_int.c
-        crypto/pkcs12/p12_utl.c
-        crypto/evp/p_open.c
-        crypto/rsa/rsa_oaep.c
-        crypto/x509v3/v3_extku.c
-        crypto/dh/dh_meth.c
-        crypto/ec/ec_cvt.c
-        crypto/poly1305/poly1305_pmeth.c
-        crypto/cpt_err.c
-        crypto/evp/evp_pkey.c
-        crypto/asn1/x_algor.c
-        crypto/ocsp/ocsp_ext.c
-        crypto/camellia/cmll_ecb.c
-        crypto/bio/b_addr.c
-        crypto/des/cbc_cksm.c
-        crypto/engine/eng_dyn.c
-        crypto/rsa/rsa_prn.c
-        crypto/evp/e_chacha20_poly1305.c
-        crypto/asn1/a_type.c
-        crypto/evp/e_seed.c
-        crypto/engine/tb_asnmth.c
-        crypto/seed/seed_cbc.c
-        crypto/x509/x509_ext.c
-        crypto/sm2/sm2_pmeth.c
-        crypto/asn1/asn_mime.c
-        crypto/comp/c_zlib.c
-        crypto/dsa/dsa_asn1.c
-        crypto/bn/rsaz-avx2.s
-        crypto/evp/evp_key.c
-        crypto/x509v3/v3_skey.c
-        crypto/modes/xts128.c
-        crypto/bio/bf_buff.c
-        crypto/cast/c_enc.c
-        crypto/camellia/cmll_ctr.c
-        crypto/ocsp/ocsp_vfy.c
-        crypto/bio/bio_cb.c
-        crypto/dsa/dsa_key.c
-        crypto/cast/c_ofb64.c
-        crypto/rsa/rsa_ssl.c
-        crypto/asn1/p5_pbev2.c
-        crypto/bn/bn_mpi.c
-        crypto/evp/e_aes_cbc_hmac_sha1.c
-        crypto/md5/md5_one.c
-        crypto/sm3/m_sm3.c
-        crypto/asn1/evp_asn1.c
-        crypto/lhash/lh_stats.c
-        crypto/asn1/tasn_enc.c
-        crypto/evp/pmeth_lib.c
-        crypto/ec/ec_pmeth.c
-        crypto/sha/sha256.c
-        crypto/hmac/hm_pmeth.c
-        crypto/evp/names.c
-        crypto/init.c
-        crypto/cast/c_ecb.c
-        crypto/modes/ghash-x86_64.s
-        crypto/ui/ui_util.c
-        crypto/cms/cms_dd.c
-        crypto/mem_sec.c
-        crypto/modes/ctr128.c
-        crypto/bio/bss_mem.c
-        crypto/modes/ofb128.c
-        crypto/bn/bn_exp2.c
-        crypto/x509v3/v3_bcons.c
-        crypto/x509/by_file.c
-        crypto/asn1/a_dup.c
-        crypto/modes/cbc128.c
-        crypto/ct/ct_sct_ctx.c
-        crypto/pem/pem_err.c
-        crypto/engine/eng_cnf.c
-        crypto/rand/rand_err.c
-        crypto/blake2/m_blake2b.c
-        crypto/asn1/t_pkey.c
-        crypto/evp/p_dec.c
-        crypto/bn/bn_exp.c
-        crypto/engine/tb_cipher.c
-        crypto/engine/eng_table.c
-        crypto/pem/pem_pkey.c
-        crypto/aes/aesni-sha1-x86_64.s
-        crypto/asn1/ameth_lib.c
-        crypto/ec/ec_key.c
-        crypto/x509/x_pubkey.c
-        crypto/ec/ec_mult.c
-        crypto/pkcs12/p12_mutl.c
-        crypto/asn1/a_mbstr.c
-        crypto/store/store_init.c
-        crypto/pem/pem_lib.c
-        crypto/ec/ecp_nistputil.c
-        crypto/rand/rand_win.c
-        crypto/asn1/a_utctm.c
-        crypto/async/arch/async_win.c
-        crypto/ts/ts_rsp_sign.c
-        crypto/pem/pem_sign.c
-        crypto/bio/b_dump.c
-        crypto/asn1/x_info.c
-        crypto/dsa/dsa_depr.c
-        crypto/x509/x_attrib.c
-        crypto/asn1/a_verify.c
-        crypto/dh/dh_rfc7919.c
-        crypto/x509v3/v3_info.c
-        crypto/ts/ts_lib.c
-        crypto/x509v3/pcy_data.c
-        crypto/x509/x509_lu.c
-        crypto/evp/p_verify.c
-        crypto/rc2/rc2cfb64.c
-        crypto/async/arch/async_null.c
-        crypto/bf/bf_ofb64.c
-        crypto/ocsp/ocsp_ht.c
-        crypto/ec/curve25519.c
-        crypto/engine/tb_pkmeth.c
+        ${COMMON_crypto_SRCS}
+        crypto/engine/tb_pkmeth.c crypto/sha/sha512-x86_64.s crypto/engine/eng_table.c
+        crypto/ec/ecp_nistz256.c crypto/bn/x86_64-mont.s crypto/engine/tb_dh.c
+        crypto/rc4/rc4-x86_64.s crypto/engine/eng_ctrl.c crypto/camellia/cmll_misc.c
+        crypto/sha/sha256-x86_64.s crypto/md5/md5-x86_64.s crypto/modes/ghash-x86_64.s
+        crypto/engine/eng_lib.c crypto/engine/tb_rand.c crypto/x86_64cpuid.s
+        crypto/bn/x86_64-mont5.s crypto/engine/tb_eckey.c crypto/engine/tb_digest.c
+        crypto/sha/sha1-x86_64.s crypto/engine/tb_asnmth.c crypto/poly1305/poly1305-x86_64.s
+        crypto/ec/ecp_nistz256-x86_64.s crypto/modes/aesni-gcm-x86_64.s crypto/engine/eng_fat.c
+        crypto/sha/sha1-mb-x86_64.s crypto/bn/rsaz-x86_64.s crypto/rc4/rc4-md5-x86_64.s
+        crypto/aes/aesni-sha1-x86_64.s crypto/aes/aes_core.c crypto/engine/tb_dsa.c
+        crypto/engine/eng_all.c crypto/bn/rsaz_exp.c crypto/whrlpool/wp-x86_64.s
+        crypto/engine/eng_rdrand.c crypto/bn/x86_64-gf2m.s crypto/camellia/cmll-x86_64.s
+        crypto/engine/eng_list.c crypto/bf/bf_enc.c crypto/bn/rsaz-avx2.s
+        crypto/engine/eng_cnf.c crypto/engine/tb_rsa.c crypto/des/fcrypt_b.c
+        crypto/aes/aesni-mb-x86_64.s crypto/aes/vpaes-x86_64.s crypto/aes/aesni-sha256-x86_64.s
+        crypto/des/des_enc.c crypto/sha/sha256-mb-x86_64.s crypto/ec/x25519-x86_64.s
+        crypto/engine/eng_err.c crypto/engine/eng_init.c crypto/engine/eng_dyn.c
+        crypto/engine/eng_pkey.c crypto/engine/tb_cipher.c crypto/aes/aesni-x86_64.s
+        crypto/bn/asm/x86_64-gcc.c crypto/sha/keccak1600-x86_64.s crypto/chacha/chacha-x86_64.s
         crypto/engine/eng_openssl.c
-        crypto/evp/p_lib.c
-        crypto/bn/x86_64-mont.s
-        crypto/engine/eng_init.c
-        crypto/idea/i_ecb.c
-        crypto/ec/ecdh_ossl.c
-        crypto/kdf/tls1_prf.c
-        crypto/dsa/dsa_ossl.c
-        crypto/modes/aesni-gcm-x86_64.s
-        crypto/sha/sha512.c
-        crypto/ec/ec2_oct.c
-        crypto/des/des_enc.c
-        crypto/aria/aria.c
-        crypto/conf/conf_api.c
-        crypto/cmac/cm_ameth.c
-        crypto/evp/digest.c
-        crypto/pkcs12/p12_npas.c
-        crypto/dh/dh_asn1.c
-        crypto/ocsp/v3_ocsp.c
-        crypto/pkcs12/p12_attr.c
-        crypto/ts/ts_err.c
-        crypto/idea/i_skey.c
-        crypto/mem_dbg.c
-        crypto/dh/dh_lib.c
-        crypto/pem/pem_all.c
-        crypto/engine/tb_digest.c
-        crypto/aes/vpaes-x86_64.s
-        crypto/modes/ocb128.c
-        crypto/dh/dh_gen.c
-        crypto/ts/ts_conf.c
-        crypto/engine/eng_lib.c
-        crypto/ec/curve448/curve448.c
-        crypto/dh/dh_ameth.c
-        crypto/engine/tb_dh.c
-        crypto/evp/e_idea.c
-        crypto/camellia/cmll-x86_64.s
-        crypto/bn/bn_print.c
-        crypto/bn/bn_sqrt.c
-        crypto/ec/curve448/curve448_tables.c
-        crypto/ex_data.c
-        crypto/evp/pmeth_fn.c
-        crypto/bio/bio_lib.c
-        crypto/rsa/rsa_pss.c
-        crypto/objects/o_names.c
-        crypto/evp/pmeth_gn.c
-        crypto/x509v3/v3_asid.c
-        crypto/bn/bn_depr.c
-        crypto/aes/aes_core.c
-        crypto/asn1/x_long.c
-        crypto/pkcs12/p12_sbag.c
-        crypto/rand/drbg_lib.c
-        crypto/des/ofb64enc.c
-        crypto/evp/p_enc.c
-        crypto/x509v3/v3_akey.c
-        crypto/asn1/f_string.c
-        crypto/camellia/cmll_misc.c
-        crypto/rsa/rsa_x931.c
-        crypto/asn1/t_bitst.c
-        crypto/evp/e_bf.c
-        crypto/hmac/hmac.c
-        crypto/x509/x_crl.c
-        crypto/aes/aes_cbc.c
-        crypto/ec/curve448/arch_32/f_impl.c
-        crypto/x509/x_name.c
-        crypto/pem/pem_info.c
-        crypto/asn1/p5_pbe.c
-        crypto/x509v3/v3_admis.c
-        crypto/mdc2/mdc2_one.c
-        crypto/pkcs7/pk7_lib.c
-        crypto/evp/bio_md.c
-        crypto/asn1/d2i_pr.c
-        crypto/asn1/p8_pkey.c
-        crypto/seed/seed_ecb.c
-        crypto/rc4/rc4-md5-x86_64.s
-        crypto/x509v3/v3_utl.c
-        crypto/x509/x509_obj.c
-        crypto/bn/bn_const.c
-        crypto/sha/sha1dgst.c
-        crypto/aes/aesni-sha256-x86_64.s
-        crypto/cryptlib.c
-        crypto/evp/e_old.c
-        crypto/blake2/blake2b.c
-        crypto/evp/bio_enc.c
-        crypto/evp/evp_cnf.c
-        crypto/des/pcbc_enc.c
-        crypto/x509/x509_vfy.c
-        crypto/rand/drbg_ctr.c
-        crypto/sha/sha256-mb-x86_64.s
-        crypto/ts/ts_req_print.c
-        crypto/sha/sha1_one.c
-        crypto/x509/x509spki.c
-        crypto/modes/cfb128.c
-        crypto/cms/cms_pwri.c
-        crypto/bn/asm/x86_64-gcc.c
-        crypto/chacha/chacha-x86_64.s
-        crypto/bio/bio_meth.c
-        crypto/asn1/x_bignum.c
-        crypto/async/arch/async_posix.c
-        crypto/asn1/asn1_gen.c
-        crypto/asn1/a_bitstr.c
-        crypto/ct/ct_prn.c
-        crypto/engine/eng_fat.c
-        crypto/pkcs7/pk7_attr.c
-        crypto/bio/b_sock2.c
-        crypto/cmac/cmac.c
-        crypto/cms/cms_sd.c
-        crypto/conf/conf_ssl.c
-        crypto/aes/aesni-x86_64.s
     )
 
     add_library(crypto STATIC ${crypto_SRCS})
 
-    TARGET_INCLUDE_DIRECTORIES(crypto PRIVATE crypto/ec/curve448/arch_32 ${CMAKE_CURRENT_SOURCE_DIR} crypto crypto/ec/curve448 crypto/modes include crypto/include)
-    TARGET_COMPILE_DEFINITIONS(crypto PRIVATE  RC4_ASM SHA512_ASM OPENSSL_BN_ASM_MONT OPENSSL_BN_ASM_GF2m OPENSSLDIR="/usr/local/ssl" OPENSSL_CPUID_OBJ X25519_ASM OPENSSL_PIC KECCAK1600_ASM OPENSSL_BN_ASM_MONT5 NDEBUG ENGINESDIR="/usr/local/lib/engines-1.1" SHA256_ASM VPAES_ASM GHASH_ASM SHA1_ASM L_ENDIAN POLY1305_ASM MD5_ASM OPENSSL_USE_NODELETE OPENSSL_IA32_SSE2 ECP_NISTZ256_ASM)
-    TARGET_COMPILE_OPTIONS(crypto PRIVATE -Qunused-arguments -pthread -Wall -Wa,--noexecstack -m64 -fPIC)
+    TARGET_INCLUDE_DIRECTORIES(crypto PRIVATE crypto/include include ${CMAKE_CURRENT_SOURCE_DIR} crypto crypto/ec/curve448 crypto/modes crypto/ec/curve448/arch_32)
+    TARGET_COMPILE_DEFINITIONS(crypto PRIVATE  ECP_NISTZ256_ASM SHA1_ASM POLY1305_ASM GHASH_ASM ENGINESDIR="/usr/local/lib/engines-1.1" OPENSSL_BN_ASM_MONT5 VPAES_ASM KECCAK1600_ASM L_ENDIAN X25519_ASM NDEBUG OPENSSLDIR="/usr/local/ssl" RC4_ASM MD5_ASM SHA256_ASM OPENSSL_IA32_SSE2 OPENSSL_PIC OPENSSL_BN_ASM_MONT OPENSSL_BN_ASM_GF2m SHA512_ASM OPENSSL_CPUID_OBJ OPENSSL_USE_NODELETE)
+    TARGET_COMPILE_OPTIONS(crypto PRIVATE  -pthread -m64 -Wa,--noexecstack -Qunused-arguments -fPIC)
+        
+elseif("iossimulator-xcrun")
+    set(arch "iossimulator-xcrun")
+    find_program(PERL_EXECUTABLE perl)
+    if(NOT PERL_EXECUTABLE)
+        message(FATAL_ERROR("Perl not found"))
+    endif(NOT PERL_EXECUTABLE)
 
+    message("Configuring configdata.pm for \"${arch}\"")
+    
+    EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} Configure ${arch} 
+
+            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+            OUTPUT_VARIABLE TEMP
+            ERROR_VARIABLE ERROR
+    )
+    if(ERROR)
+        MESSAGE(FATAL_ERROR("Error while configuring: ${ERROR}"))
+    endif(ERROR)
+
+    EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} util/mkbuildinf.pl "clang -fPIC -arch arm64 -mios-version-min=7.0.0 -fno-common -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer//SDKs/iPhoneOS.sdk -O3 -DOPENSSL_PIC -D_REENTRANT -DNDEBUG" ""ios64-cross"" 
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+        OUTPUT_FILE crypto/buildinf.h
+        ERROR_VARIABLE ERROR)
+    if(ERROR)
+        MESSAGE(FATAL_ERROR("Error while generating mkbuildinf: ${ERROR}"))
+    endif(ERROR)
+
+    foreach(el crypto/include/internal/bn_conf.h;crypto/include/internal/dso_conf.h;include/openssl/opensslconf.h)
+        MESSAGE("Generating ${el}")
+        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE}
+            "-I${CMAKE_CURRENT_LIST_DIR}" -Mconfigdata "util/dofile.pl" "-oMakefile" ${el}.in
+            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+            OUTPUT_FILE ${el}
+            ERROR_VARIABLE error)
+        if(error)
+            message(FATAL_ERROR("Error while generating: ${error}"))
+        endif(error)
+    endforeach()
+    
+    SET(ssl_SRCS
+        ${COMMON_ssl_SRCS}
+        
+    )
+
+    add_library(ssl STATIC ${ssl_SRCS})
+
+    TARGET_INCLUDE_DIRECTORIES(ssl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} include)
+    TARGET_COMPILE_DEFINITIONS(ssl PRIVATE  NDEBUG OPENSSLDIR="/usr/local/ssl" ENGINESDIR="/usr/local/lib/engines-1.1" _REENTRANT OPENSSL_PIC)
+    TARGET_COMPILE_OPTIONS(ssl PRIVATE  -fno-common -fPIC -mios-version-min=7.0.0)
+    
+    SET(crypto_SRCS
+        ${COMMON_crypto_SRCS}
+        crypto/camellia/camellia.c crypto/whrlpool/wp_block.c crypto/rc4/rc4_skey.c
+        crypto/des/des_enc.c crypto/bn/bn_asm.c crypto/camellia/cmll_cbc.c
+        crypto/bf/bf_enc.c crypto/camellia/cmll_misc.c crypto/rc4/rc4_enc.c
+        crypto/chacha/chacha_enc.c crypto/aes/aes_core.c crypto/sha/keccak1600.c
+        crypto/des/fcrypt_b.c crypto/mem_clr.c
+    )
+
+    add_library(crypto STATIC ${crypto_SRCS})
+
+    TARGET_INCLUDE_DIRECTORIES(crypto PRIVATE crypto/include include ${CMAKE_CURRENT_SOURCE_DIR} crypto crypto/ec/curve448 crypto/modes crypto/ec/curve448/arch_32)
+    TARGET_COMPILE_DEFINITIONS(crypto PRIVATE  NDEBUG OPENSSLDIR="/usr/local/ssl" ENGINESDIR="/usr/local/lib/engines-1.1" _REENTRANT OPENSSL_PIC)
+    TARGET_COMPILE_OPTIONS(crypto PRIVATE  -fno-common -fPIC -mios-version-min=7.0.0)
 
 endif()
 
