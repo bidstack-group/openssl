@@ -4163,24 +4163,23 @@ elseif("iossimulator-xcrun")
 
     add_library(ssl STATIC ${ssl_SRCS})
 
-    TARGET_INCLUDE_DIRECTORIES(ssl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} include)
-    TARGET_COMPILE_DEFINITIONS(ssl PRIVATE  NDEBUG OPENSSLDIR="/usr/local/ssl" ENGINESDIR="/usr/local/lib/engines-1.1" _REENTRANT OPENSSL_PIC)
-    TARGET_COMPILE_OPTIONS(ssl PRIVATE  -fno-common -fPIC -mios-version-min=7.0.0)
+    TARGET_INCLUDE_DIRECTORIES(ssl PRIVATE include ${CMAKE_CURRENT_SOURCE_DIR})
+    TARGET_COMPILE_DEFINITIONS(ssl PRIVATE  NDEBUG _REENTRANT OPENSSLDIR="/usr/local/ssl" ENGINESDIR="/usr/local/lib/engines-1.1" OPENSSL_PIC)
+    TARGET_COMPILE_OPTIONS(ssl PRIVATE -fno-common  -fPIC -mios-version-min=7.0.0)
     
     SET(crypto_SRCS
         ${COMMON_crypto_SRCS}
-        crypto/camellia/camellia.c crypto/whrlpool/wp_block.c crypto/rc4/rc4_skey.c
-        crypto/des/des_enc.c crypto/bn/bn_asm.c crypto/camellia/cmll_cbc.c
-        crypto/bf/bf_enc.c crypto/camellia/cmll_misc.c crypto/rc4/rc4_enc.c
-        crypto/chacha/chacha_enc.c crypto/aes/aes_core.c crypto/sha/keccak1600.c
-        crypto/des/fcrypt_b.c crypto/mem_clr.c
+        crypto/rc4/rc4_enc.c crypto/des/des_enc.c crypto/camellia/camellia.c
+        crypto/des/fcrypt_b.c crypto/rc4/rc4_skey.c crypto/whrlpool/wp_block.c
+        crypto/camellia/cmll_misc.c crypto/chacha/chacha_enc.c crypto/bn/bn_asm.c
+        crypto/sha/keccak1600.c crypto/bf/bf_enc.c crypto/mem_clr.c
+        crypto/camellia/cmll_cbc.c crypto/aes/aes_core.c
     )
 
     add_library(crypto STATIC ${crypto_SRCS})
 
-    TARGET_INCLUDE_DIRECTORIES(crypto PRIVATE crypto/include include ${CMAKE_CURRENT_SOURCE_DIR} crypto crypto/ec/curve448 crypto/modes crypto/ec/curve448/arch_32)
-    TARGET_COMPILE_DEFINITIONS(crypto PRIVATE  NDEBUG OPENSSLDIR="/usr/local/ssl" ENGINESDIR="/usr/local/lib/engines-1.1" _REENTRANT OPENSSL_PIC)
-    TARGET_COMPILE_OPTIONS(crypto PRIVATE  -fno-common -fPIC -mios-version-min=7.0.0)
-
+    TARGET_INCLUDE_DIRECTORIES(crypto PRIVATE crypto crypto/include crypto/modes crypto/ec/curve448/arch_32 include ${CMAKE_CURRENT_SOURCE_DIR} crypto/ec/curve448)
+    TARGET_COMPILE_DEFINITIONS(crypto PRIVATE  NDEBUG _REENTRANT OPENSSLDIR="/usr/local/ssl" ENGINESDIR="/usr/local/lib/engines-1.1" OPENSSL_PIC)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-common -mios-version-min=7.0.0 -fPIC ")
 endif()
 
