@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 project(open_ssl C ASM)
 
 
-SET(COMMON_ssl_SRCS
+set(COMMON_ssl_SRCS
     ssl/ssl_rsa.c ssl/statem/statem_srvr.c
     ssl/s3_enc.c ssl/d1_srtp.c
     ssl/statem/statem.c ssl/ssl_err.c
@@ -26,7 +26,7 @@ SET(COMMON_ssl_SRCS
     ssl/statem/extensions_cust.c ssl/ssl_mcnf.c
     ssl/record/ssl3_record_tls13.c ssl/s3_cbc.c
     )
-SET(COMMON_crypto_SRCS
+set(COMMON_crypto_SRCS
     crypto/bn/bn_ctx.c crypto/rsa/rsa_gen.c crypto/conf/conf_sap.c crypto/ec/ec_mult.c crypto/x509/x_exten.c crypto/ec/ec_check.c
     crypto/evp/pmeth_fn.c crypto/ec/ecp_oct.c crypto/hmac/hmac.c crypto/bn/bn_lib.c crypto/ui/ui_null.c crypto/des/set_key.c
     crypto/bn/bn_mpi.c crypto/rand/rand_lib.c crypto/pem/pem_all.c crypto/ec/ecdh_ossl.c crypto/asn1/tasn_dec.c crypto/evp/m_mdc2.c
@@ -131,7 +131,8 @@ SET(COMMON_crypto_SRCS
     )
 
 if(CMAKE_OSX_SYSROOT MATCHES iPhoneSimulator)
-	set(arch "iossimulator-xcrun")
+
+        set(arch "iossimulator-xcrun")
         message("Building ${arch}")
     
         find_program(PERL_EXECUTABLE perl)
@@ -140,27 +141,26 @@ if(CMAKE_OSX_SYSROOT MATCHES iPhoneSimulator)
         endif(NOT PERL_EXECUTABLE)
 
         message("Configuring configdata.pm for \"${arch}\"")
-        
-        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} Configure ${arch}  no-asm
+        execute_process(COMMAND ${PERL_EXECUTABLE} Configure ${arch}  no-asm
                 WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
                 OUTPUT_VARIABLE TEMP
-                ERROR_VARIABLE ERROR
+                ERROR_VARIABLE error
         )
-        if(ERROR)
-            MESSAGE(FATAL_ERROR("Error while configuring: ${ERROR}"))
-        endif(ERROR)
+        if(error)
+            message(FATAL_ERROR("Error while configuring: ${error}"))
+        endif(error)
 
-        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} util/mkbuildinf.pl "xcrun -sdk iphonesimulator cc -fPIC  -O3 -DOPENSSL_PIC -D_REENTRANT -DNDEBUG" "iossimulator-xcrun" 
+        execute_process(COMMAND ${PERL_EXECUTABLE} util/mkbuildinf.pl "xcrun -sdk iphonesimulator cc -fPIC  -O3 -DOPENSSL_PIC -D_REENTRANT -DNDEBUG" "iossimulator-xcrun" 
             WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
             OUTPUT_FILE crypto/buildinf.h
-            ERROR_VARIABLE ERROR)
-        if(ERROR)
-            MESSAGE(FATAL_ERROR("Error while generating mkbuildinf: ${ERROR}"))
-        endif(ERROR)
+            ERROR_VARIABLE error)
+        if(error)
+            message(FATAL_ERROR("Error while generating mkbuildinf: ${error}"))
+        endif(error)
 
         foreach(el crypto/include/internal/bn_conf.h;crypto/include/internal/dso_conf.h;include/openssl/opensslconf.h)
-            MESSAGE("Generating ${el}")
-            EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE}
+            message("Generating ${el}")
+            execute_process(COMMAND ${PERL_EXECUTABLE}
                 "-I${CMAKE_CURRENT_LIST_DIR}" -Mconfigdata "util/dofile.pl" "-oMakefile" ${el}.in
                 WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
                 OUTPUT_FILE ${el}
@@ -170,60 +170,53 @@ if(CMAKE_OSX_SYSROOT MATCHES iPhoneSimulator)
             endif(error)
         endforeach()
         
-    SET(ssl_SRCS
-        ${COMMON_ssl_SRCS}
-    )
-
-    add_library(ssl STATIC ${ssl_SRCS})
-
-    TARGET_INCLUDE_DIRECTORIES(ssl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} include)
-    TARGET_COMPILE_DEFINITIONS(ssl PRIVATE  ENGINESDIR="/usr/local/lib/engines-1.1" _REENTRANT OPENSSLDIR="/usr/local/ssl" OPENSSL_PIC NDEBUG)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -sdk iphonesimulator -fPIC -mios-version-min=7.0.0")
+    add_library(ssl STATIC ${COMMON_ssl_SRCS})
+    target_include_directories(ssl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} include)
+    target_compile_definitions(ssl PRIVATE  ENGINESDIR="/usr/local/lib/engines-1.1" _REENTRANT OPENSSLDIR="/usr/local/ssl" OPENSSL_PIC NDEBUG)
     
-    SET(crypto_SRCS
-        ${COMMON_crypto_SRCS}
+    set(crypto_SRCS ${COMMON_crypto_SRCS}
         crypto/camellia/cmll_cbc.c crypto/mem_clr.c crypto/whrlpool/wp_block.c
         crypto/sha/keccak1600.c crypto/rc4/rc4_skey.c crypto/bn/bn_asm.c
         crypto/rc4/rc4_enc.c crypto/chacha/chacha_enc.c crypto/camellia/camellia.c
     )
 
     add_library(crypto STATIC ${crypto_SRCS})
-
-    TARGET_INCLUDE_DIRECTORIES(crypto PRIVATE crypto/modes ${CMAKE_CURRENT_SOURCE_DIR} crypto/ec/curve448/arch_32 crypto/include crypto/ec/curve448 crypto include)
-    TARGET_COMPILE_DEFINITIONS(crypto PRIVATE  ENGINESDIR="/usr/local/lib/engines-1.1" _REENTRANT OPENSSLDIR="/usr/local/ssl" OPENSSL_PIC NDEBUG)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -sdk iphonesimulator -fPIC -mios-version-min=7.0.0")
+    target_include_directories(crypto PRIVATE crypto/modes ${CMAKE_CURRENT_SOURCE_DIR} crypto/ec/curve448/arch_32 crypto/include crypto/ec/curve448 crypto include)
+    target_compile_definitions(crypto PRIVATE  ENGINESDIR="/usr/local/lib/engines-1.1" _REENTRANT OPENSSLDIR="/usr/local/ssl" OPENSSL_PIC NDEBUG)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -sdk iphonesimulator -fPIC -mios-version-min=7.0.0")
     
 elseif(CMAKE_OSX_SYSROOT MATCHES MacOSX)
 
-set(arch "darwin64-x86_64-cc")
+    set(arch "darwin64-x86_64-cc")
+    message("Building ${arch}")
+
     find_program(PERL_EXECUTABLE perl)
     if(NOT PERL_EXECUTABLE)
         message(FATAL_ERROR("Perl not found"))
     endif(NOT PERL_EXECUTABLE)
 
     message("Configuring configdata.pm for \"${arch}\"")
-    
-    EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} Configure ${arch} 
+    execute_process(COMMAND ${PERL_EXECUTABLE} Configure ${arch} 
 
             WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
             OUTPUT_VARIABLE TEMP
-            ERROR_VARIABLE ERROR
+            ERROR_VARIABLE error
     )
-    if(ERROR)
-        MESSAGE(FATAL_ERROR("Error while configuring: ${ERROR}"))
-    endif(ERROR)
+    if(error)
+        message(FATAL_ERROR("Error while configuring: ${error}"))
+    endif(error)
 
-    EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} util/mkbuildinf.pl "clang -fPIC -arch x86_64 -O3 -Wall -DL_ENDIAN -DOPENSSL_PIC -DOPENSSL_CPUID_OBJ -DOPENSSL_IA32_SSE2 -DOPENSSL_BN_ASM_MONT -DOPENSSL_BN_ASM_MONT5 -DOPENSSL_BN_ASM_GF2m -DSHA1_ASM -DSHA256_ASM -DSHA512_ASM -DKECCAK1600_ASM -DRC4_ASM -DMD5_ASM -DVPAES_ASM -DGHASH_ASM -DECP_NISTZ256_ASM -DX25519_ASM -DPOLY1305_ASM -D_REENTRANT -DNDEBUG" "darwin64-x86_64-cc" 
+    execute_process(COMMAND ${PERL_EXECUTABLE} util/mkbuildinf.pl "clang -fPIC -arch x86_64 -O3 -Wall -DL_ENDIAN -DOPENSSL_PIC -DOPENSSL_CPUID_OBJ -DOPENSSL_IA32_SSE2 -DOPENSSL_BN_ASM_MONT -DOPENSSL_BN_ASM_MONT5 -DOPENSSL_BN_ASM_GF2m -DSHA1_ASM -DSHA256_ASM -DSHA512_ASM -DKECCAK1600_ASM -DRC4_ASM -DMD5_ASM -DVPAES_ASM -DGHASH_ASM -DECP_NISTZ256_ASM -DX25519_ASM -DPOLY1305_ASM -D_REENTRANT -DNDEBUG" "darwin64-x86_64-cc" 
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
         OUTPUT_FILE crypto/buildinf.h
-        ERROR_VARIABLE ERROR)
-    if(ERROR)
-        MESSAGE(FATAL_ERROR("Error while generating mkbuildinf: ${ERROR}"))
-    endif(ERROR)
+        ERROR_VARIABLE error)
+    if(error)
+        message(FATAL_ERROR("Error while generating mkbuildinf: ${error}"))
+    endif(error)
 
     foreach(el crypto/include/internal/bn_conf.h;crypto/include/internal/dso_conf.h;include/openssl/opensslconf.h)
-        MESSAGE("Generating ${el}")
-        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE}
+        message("Generating ${el}")
+        execute_process(COMMAND ${PERL_EXECUTABLE}
             "-I${CMAKE_CURRENT_LIST_DIR}" -Mconfigdata "util/dofile.pl" "-oMakefile" ${el}.in
             WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
             OUTPUT_FILE ${el}
@@ -242,7 +235,7 @@ set(arch "darwin64-x86_64-cc")
         list(GET PLs ${idx} pl)
         list(GET ASMs ${idx} asm)
         MESSAGE("Running \"${pl}\" to get \"${asm}\"")
-        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE}
+        execute_process(COMMAND ${PERL_EXECUTABLE}
             ${pl} macosx ${asm}
             WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
             OUTPUT_VARIABLE temp
@@ -253,16 +246,10 @@ set(arch "darwin64-x86_64-cc")
         endif(error)
     endforeach()
         
-    SET(ssl_SRCS
-        ${COMMON_ssl_SRCS}
-        
-    )
+    add_library(ssl STATIC ${COMMON_ssl_SRCS})
 
-    add_library(ssl STATIC ${ssl_SRCS})
-
-    TARGET_INCLUDE_DIRECTORIES(ssl PRIVATE include ${CMAKE_CURRENT_SOURCE_DIR})
-    TARGET_COMPILE_DEFINITIONS(ssl PRIVATE  MD5_ASM POLY1305_ASM X25519_ASM RC4_ASM OPENSSL_CPUID_OBJ OPENSSLDIR="/usr/local/ssl" ECP_NISTZ256_ASM VPAES_ASM SHA256_ASM OPENSSL_BN_ASM_MONT5 _REENTRANT NDEBUG OPENSSL_IA32_SSE2 SHA1_ASM OPENSSL_PIC SHA512_ASM L_ENDIAN GHASH_ASM ENGINESDIR="/usr/local/lib/engines-1.1" KECCAK1600_ASM OPENSSL_BN_ASM_MONT OPENSSL_BN_ASM_GF2m)
-    TARGET_COMPILE_OPTIONS(ssl PRIVATE -fPIC )
+    target_include_directories(ssl PRIVATE include ${CMAKE_CURRENT_SOURCE_DIR})
+    target_compile_definitions(ssl PRIVATE  MD5_ASM POLY1305_ASM X25519_ASM RC4_ASM OPENSSL_CPUID_OBJ OPENSSLDIR="/usr/local/ssl" ECP_NISTZ256_ASM VPAES_ASM SHA256_ASM OPENSSL_BN_ASM_MONT5 _REENTRANT NDEBUG OPENSSL_IA32_SSE2 SHA1_ASM OPENSSL_PIC SHA512_ASM L_ENDIAN GHASH_ASM ENGINESDIR="/usr/local/lib/engines-1.1" KECCAK1600_ASM OPENSSL_BN_ASM_MONT OPENSSL_BN_ASM_GF2m)
     
     SET(crypto_SRCS
         ${COMMON_crypto_SRCS}
@@ -290,40 +277,41 @@ set(arch "darwin64-x86_64-cc")
 
     add_library(crypto STATIC ${crypto_SRCS})
 
-    TARGET_INCLUDE_DIRECTORIES(crypto PRIVATE crypto/modes include ${CMAKE_CURRENT_SOURCE_DIR} crypto/ec/curve448/arch_32 crypto crypto/include crypto/ec/curve448)
-    TARGET_COMPILE_DEFINITIONS(crypto PRIVATE  MD5_ASM POLY1305_ASM X25519_ASM RC4_ASM OPENSSL_CPUID_OBJ OPENSSLDIR="/usr/local/ssl" ECP_NISTZ256_ASM VPAES_ASM SHA256_ASM OPENSSL_BN_ASM_MONT5 _REENTRANT NDEBUG OPENSSL_IA32_SSE2 SHA1_ASM OPENSSL_PIC SHA512_ASM L_ENDIAN GHASH_ASM ENGINESDIR="/usr/local/lib/engines-1.1" KECCAK1600_ASM OPENSSL_BN_ASM_MONT OPENSSL_BN_ASM_GF2m)
-    TARGET_COMPILE_OPTIONS(crypto PRIVATE -fPIC )
+    target_include_directories(crypto PRIVATE crypto/modes include ${CMAKE_CURRENT_SOURCE_DIR} crypto/ec/curve448/arch_32 crypto crypto/include crypto/ec/curve448)
+    target_compile_definitions(crypto PRIVATE  MD5_ASM POLY1305_ASM X25519_ASM RC4_ASM OPENSSL_CPUID_OBJ OPENSSLDIR="/usr/local/ssl" ECP_NISTZ256_ASM VPAES_ASM SHA256_ASM OPENSSL_BN_ASM_MONT5 _REENTRANT NDEBUG OPENSSL_IA32_SSE2 SHA1_ASM OPENSSL_PIC SHA512_ASM L_ENDIAN GHASH_ASM ENGINESDIR="/usr/local/lib/engines-1.1" KECCAK1600_ASM OPENSSL_BN_ASM_MONT OPENSSL_BN_ASM_GF2m)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mios-version-min=7.0.0 -fno-common -fPIC ")
+
 elseif(CMAKE_OSX_SYSROOT MATCHES iPhoneOS)
 
     set(arch "ios-cross")
+    message("Building ${arch}")
+
     find_program(PERL_EXECUTABLE perl)
     if(NOT PERL_EXECUTABLE)
         message(FATAL_ERROR("Perl not found"))
     endif(NOT PERL_EXECUTABLE)
 
     message("Configuring configdata.pm for \"${arch}\"")
-    
-    EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} Configure ${arch} 
-
+    execute_process(COMMAND ${PERL_EXECUTABLE} Configure ${arch} 
             WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
             OUTPUT_VARIABLE TEMP
-            ERROR_VARIABLE ERROR
+            ERROR_VARIABLE error
     )
-    if(ERROR)
-        MESSAGE(FATAL_ERROR("Error while configuring: ${ERROR}"))
-    endif(ERROR)
+    if(error)
+        message(FATAL_ERROR("Error while configuring: ${error}"))
+    endif(error)
 
-    EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} util/mkbuildinf.pl "clang -fPIC -arch arm64 -mios-version-min=7.0.0 -fno-common -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer//SDKs/iPhoneOS.sdk -O3 -DOPENSSL_PIC -D_REENTRANT -DNDEBUG" "ios64-cross" 
+    execute_process(COMMAND ${PERL_EXECUTABLE} util/mkbuildinf.pl "clang -fPIC -arch arm64 -mios-version-min=7.0.0 -fno-common -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer//SDKs/iPhoneOS.sdk -O3 -DOPENSSL_PIC -D_REENTRANT -DNDEBUG" "ios64-cross" 
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
         OUTPUT_FILE crypto/buildinf.h
-        ERROR_VARIABLE ERROR)
-    if(ERROR)
-        MESSAGE(FATAL_ERROR("Error while generating mkbuildinf: ${ERROR}"))
-    endif(ERROR)
+        ERROR_VARIABLE error)
+    if(error)
+        message(FATAL_ERROR("Error while generating mkbuildinf: ${error}"))
+    endif(error)
 
     foreach(el crypto/include/internal/bn_conf.h;crypto/include/internal/dso_conf.h;include/openssl/opensslconf.h)
-        MESSAGE("Generating ${el}")
-        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE}
+        message("Generating ${el}")
+        execute_process(COMMAND ${PERL_EXECUTABLE}
             "-I${CMAKE_CURRENT_LIST_DIR}" -Mconfigdata "util/dofile.pl" "-oMakefile" ${el}.in
             WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
             OUTPUT_FILE ${el}
@@ -333,18 +321,12 @@ elseif(CMAKE_OSX_SYSROOT MATCHES iPhoneOS)
         endif(error)
     endforeach()
     
-    SET(ssl_SRCS
-        ${COMMON_ssl_SRCS}
-        
-    )
+    add_library(ssl STATIC ${COMMON_ssl_SRCS})
 
-    add_library(ssl STATIC ${ssl_SRCS})
-
-    TARGET_INCLUDE_DIRECTORIES(ssl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} include)
-    TARGET_COMPILE_DEFINITIONS(ssl PRIVATE  _REENTRANT NDEBUG OPENSSLDIR="/usr/local/ssl" ENGINESDIR="/usr/local/lib/engines-1.1" OPENSSL_PIC)
-    TARGET_COMPILE_OPTIONS(ssl PRIVATE -mios-version-min=7.0.0 -fno-common -fPIC )
+    target_include_directories(ssl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} include)
+    target_compile_definitions(ssl PRIVATE  _REENTRANT NDEBUG OPENSSLDIR="/usr/local/ssl" ENGINESDIR="/usr/local/lib/engines-1.1" OPENSSL_PIC)
     
-    SET(crypto_SRCS
+    set(crypto_SRCS
         ${COMMON_crypto_SRCS}
         crypto/bf/bf_enc.c crypto/camellia/cmll_cbc.c crypto/sha/keccak1600.c
         crypto/mem_clr.c crypto/camellia/cmll_misc.c crypto/whrlpool/wp_block.c
@@ -355,12 +337,13 @@ elseif(CMAKE_OSX_SYSROOT MATCHES iPhoneOS)
 
     add_library(crypto STATIC ${crypto_SRCS})
 
-    TARGET_INCLUDE_DIRECTORIES(crypto PRIVATE crypto/ec/curve448/arch_32 crypto/include include ${CMAKE_CURRENT_SOURCE_DIR} crypto/modes crypto/ec/curve448 crypto)
-    TARGET_COMPILE_DEFINITIONS(crypto PRIVATE  _REENTRANT NDEBUG OPENSSLDIR="/usr/local/ssl" ENGINESDIR="/usr/local/lib/engines-1.1" OPENSSL_PIC)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mios-version-min=7.0.0 -fno-common -fPIC ")
+    target_include_directories(crypto PRIVATE crypto/ec/curve448/arch_32 crypto/include include ${CMAKE_CURRENT_SOURCE_DIR} crypto/modes crypto/ec/curve448 crypto)
+    target_compile_definitions(crypto PRIVATE  _REENTRANT NDEBUG OPENSSLDIR="/usr/local/ssl" ENGINESDIR="/usr/local/lib/engines-1.1" OPENSSL_PIC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mios-version-min=7.0.0 -fno-common -fPIC ")
         
 elseif(ANDROID)
     IF(${ANDROID_ABI} STREQUAL "x86_64")
+
         set(arch "android-x86_64")
         message("Building ${arch}")
         
@@ -368,17 +351,12 @@ elseif(ANDROID)
         file(COPY android/${arch}/bn_conf.h android/${arch}/dso_conf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/include/internal/)
         file(COPY android/${arch}/buildinf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/)
             
-        SET(ssl_SRCS
-            ${COMMON_ssl_SRCS}
-        )
+        add_library(ssl STATIC ${COMMON_ssl_SRCS})
 
-        add_library(ssl STATIC ${ssl_SRCS})
-
-        TARGET_INCLUDE_DIRECTORIES(ssl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} include)
-        TARGET_COMPILE_DEFINITIONS(ssl PRIVATE  NDEBUG OPENSSL_USE_NODELETE OPENSSL_PIC ENGINESDIR="/usr/local/lib/engines-1.1" OPENSSLDIR="/usr/local/ssl")
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -pthread ")
+        target_include_directories(ssl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} include)
+        target_compile_definitions(ssl PRIVATE  NDEBUG OPENSSL_USE_NODELETE OPENSSL_PIC ENGINESDIR="/usr/local/lib/engines-1.1" OPENSSLDIR="/usr/local/ssl")
         
-        SET(crypto_SRCS
+        set(crypto_SRCS
             ${COMMON_crypto_SRCS}
             crypto/engine/eng_all.c crypto/rc4/rc4_enc.c crypto/camellia/camellia.c
             crypto/engine/eng_rdrand.c crypto/engine/tb_cipher.c crypto/camellia/cmll_cbc.c
@@ -395,49 +373,47 @@ elseif(ANDROID)
 
         add_library(crypto STATIC ${crypto_SRCS})
 
-        TARGET_INCLUDE_DIRECTORIES(crypto PRIVATE crypto/modes crypto crypto/ec/curve448 crypto/include ${CMAKE_CURRENT_SOURCE_DIR} include crypto/ec/curve448/arch_32)
-        TARGET_COMPILE_DEFINITIONS(crypto PRIVATE  NDEBUG OPENSSL_USE_NODELETE OPENSSL_PIC ENGINESDIR="/usr/local/lib/engines-1.1" OPENSSLDIR="/usr/local/ssl")
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -pthread ")
+        target_include_directories(crypto PRIVATE crypto/modes crypto crypto/ec/curve448 crypto/include ${CMAKE_CURRENT_SOURCE_DIR} include crypto/ec/curve448/arch_32)
+        target_compile_definitions(crypto PRIVATE  NDEBUG OPENSSL_USE_NODELETE OPENSSL_PIC ENGINESDIR="/usr/local/lib/engines-1.1" OPENSSLDIR="/usr/local/ssl")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -pthread ")
 
-        ELSEIF(${ANDROID_ABI} STREQUAL "x86")
-            set(arch "android-x86")
-            message("Building ${arch}")
-            file(COPY android/${arch}/opensslconf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/include/openssl/)
-            file(COPY android/${arch}/bn_conf.h android/${arch}/dso_conf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/include/internal/)
-            file(COPY android/${arch}/buildinf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/)
+    ELSEIF(${ANDROID_ABI} STREQUAL "x86")
 
-            SET(ssl_SRCS
-                ${COMMON_ssl_SRCS}
-            )
+        set(arch "android-x86")
+        message("Building ${arch}")
 
-            add_library(ssl STATIC ${ssl_SRCS})
+        file(COPY android/${arch}/opensslconf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/include/openssl/)
+        file(COPY android/${arch}/bn_conf.h android/${arch}/dso_conf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/include/internal/)
+        file(COPY android/${arch}/buildinf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/)
 
-            TARGET_INCLUDE_DIRECTORIES(ssl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} include)
-            TARGET_COMPILE_DEFINITIONS(ssl PRIVATE  ENGINESDIR="/usr/local/lib/engines-1.1" OPENSSL_PIC OPENSSLDIR="/usr/local/ssl" OPENSSL_USE_NODELETE NDEBUG)
-            SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fomit-frame-pointer -pthread  -fPIC")
-            
-            SET(crypto_SRCS
-                ${COMMON_crypto_SRCS}
-                crypto/engine/eng_ctrl.c crypto/engine/tb_eckey.c crypto/bn/bn_asm.c
-                crypto/engine/tb_pkmeth.c crypto/whrlpool/wp_block.c crypto/engine/eng_cnf.c
-                crypto/engine/eng_rdrand.c crypto/camellia/camellia.c crypto/rc4/rc4_skey.c
-                crypto/engine/eng_table.c crypto/engine/tb_cipher.c crypto/engine/tb_rsa.c
-                crypto/engine/tb_asnmth.c crypto/engine/eng_pkey.c crypto/mem_clr.c
-                crypto/engine/eng_init.c crypto/engine/tb_dsa.c crypto/sha/keccak1600.c
-                crypto/rc4/rc4_enc.c crypto/engine/eng_err.c crypto/engine/tb_rand.c
-                crypto/camellia/cmll_cbc.c crypto/chacha/chacha_enc.c crypto/engine/eng_lib.c
-                crypto/aes/aes_core.c crypto/engine/eng_dyn.c crypto/engine/eng_openssl.c
-                crypto/engine/eng_list.c crypto/engine/eng_all.c crypto/engine/eng_fat.c
-                crypto/engine/tb_dh.c crypto/engine/tb_digest.c
-            )
+        add_library(ssl STATIC ${COMMON_ssl_SRCS})
 
-            add_library(crypto STATIC ${crypto_SRCS})
+        target_include_directories(ssl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} include)
+        target_compile_definitions(ssl PRIVATE  ENGINESDIR="/usr/local/lib/engines-1.1" OPENSSL_PIC OPENSSLDIR="/usr/local/ssl" OPENSSL_USE_NODELETE NDEBUG)
+        
+        set(crypto_SRCS
+            ${COMMON_crypto_SRCS}
+            crypto/engine/eng_ctrl.c crypto/engine/tb_eckey.c crypto/bn/bn_asm.c
+            crypto/engine/tb_pkmeth.c crypto/whrlpool/wp_block.c crypto/engine/eng_cnf.c
+            crypto/engine/eng_rdrand.c crypto/camellia/camellia.c crypto/rc4/rc4_skey.c
+            crypto/engine/eng_table.c crypto/engine/tb_cipher.c crypto/engine/tb_rsa.c
+            crypto/engine/tb_asnmth.c crypto/engine/eng_pkey.c crypto/mem_clr.c
+            crypto/engine/eng_init.c crypto/engine/tb_dsa.c crypto/sha/keccak1600.c
+            crypto/rc4/rc4_enc.c crypto/engine/eng_err.c crypto/engine/tb_rand.c
+            crypto/camellia/cmll_cbc.c crypto/chacha/chacha_enc.c crypto/engine/eng_lib.c
+            crypto/aes/aes_core.c crypto/engine/eng_dyn.c crypto/engine/eng_openssl.c
+            crypto/engine/eng_list.c crypto/engine/eng_all.c crypto/engine/eng_fat.c
+            crypto/engine/tb_dh.c crypto/engine/tb_digest.c
+        )
 
-            TARGET_INCLUDE_DIRECTORIES(crypto PRIVATE crypto/ec/curve448/arch_32 crypto/modes ${CMAKE_CURRENT_SOURCE_DIR} include crypto/ec/curve448 crypto crypto/include)
-            TARGET_COMPILE_DEFINITIONS(crypto PRIVATE  ENGINESDIR="/usr/local/lib/engines-1.1" OPENSSL_PIC OPENSSLDIR="/usr/local/ssl" OPENSSL_USE_NODELETE NDEBUG)
-            SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fomit-frame-pointer -pthread  -fPIC")
+        add_library(crypto STATIC ${crypto_SRCS})
+
+        TARGET_INCLUDE_DIRECTORIES(crypto PRIVATE crypto/ec/curve448/arch_32 crypto/modes ${CMAKE_CURRENT_SOURCE_DIR} include crypto/ec/curve448 crypto crypto/include)
+        TARGET_COMPILE_DEFINITIONS(crypto PRIVATE  ENGINESDIR="/usr/local/lib/engines-1.1" OPENSSL_PIC OPENSSLDIR="/usr/local/ssl" OPENSSL_USE_NODELETE NDEBUG)
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fomit-frame-pointer -pthread  -fPIC")
         
     ELSEIF(${ANDROID_ABI} STREQUAL "armeabi-v7a")
+
         set(arch "android-arm")
         message("Building ${arch}")
         
@@ -445,17 +421,12 @@ elseif(ANDROID)
         file(COPY android/${arch}/bn_conf.h android/${arch}/dso_conf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/include/internal/)
         file(COPY android/${arch}/buildinf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/)
             
-        SET(ssl_SRCS
-            ${COMMON_ssl_SRCS}
-        )
+        add_library(ssl STATIC ${COMMON_ssl_SRCS})
 
-        add_library(ssl STATIC ${ssl_SRCS})
-
-        TARGET_INCLUDE_DIRECTORIES(ssl PRIVATE include ${CMAKE_CURRENT_SOURCE_DIR})
-        TARGET_COMPILE_DEFINITIONS(ssl PRIVATE  NDEBUG OPENSSL_PIC OPENSSLDIR="/usr/local/ssl" OPENSSL_USE_NODELETE ENGINESDIR="/usr/local/lib/engines-1.1")
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -pthread -fPIC")
+        target_include_directories(ssl PRIVATE include ${CMAKE_CURRENT_SOURCE_DIR})
+        target_compile_definitions(ssl PRIVATE  NDEBUG OPENSSL_PIC OPENSSLDIR="/usr/local/ssl" OPENSSL_USE_NODELETE ENGINESDIR="/usr/local/lib/engines-1.1")
         
-        SET(crypto_SRCS
+        set(crypto_SRCS
             ${COMMON_crypto_SRCS}
             crypto/engine/tb_cipher.c crypto/engine/tb_asnmth.c crypto/engine/tb_pkmeth.c
             crypto/engine/eng_fat.c crypto/chacha/chacha_enc.c crypto/engine/eng_err.c
@@ -472,11 +443,12 @@ elseif(ANDROID)
 
         add_library(crypto STATIC ${crypto_SRCS})
 
-        TARGET_INCLUDE_DIRECTORIES(crypto PRIVATE crypto/include crypto crypto/modes ${CMAKE_CURRENT_SOURCE_DIR} crypto/ec/curve448/arch_32 crypto/ec/curve448 include)
-        TARGET_COMPILE_DEFINITIONS(crypto PRIVATE  NDEBUG OPENSSL_PIC OPENSSLDIR="/usr/local/ssl" OPENSSL_USE_NODELETE ENGINESDIR="/usr/local/lib/engines-1.1")
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -pthread -fPIC")
+        target_include_directories(crypto PRIVATE crypto/include crypto crypto/modes ${CMAKE_CURRENT_SOURCE_DIR} crypto/ec/curve448/arch_32 crypto/ec/curve448 include)
+        target_compile_definitions(crypto PRIVATE  NDEBUG OPENSSL_PIC OPENSSLDIR="/usr/local/ssl" OPENSSL_USE_NODELETE ENGINESDIR="/usr/local/lib/engines-1.1")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -pthread -fPIC")
 
     ELSEIF(${ANDROID_ABI} STREQUAL "arm64-v8a")
+
         set(arch "android-arm64")
         message("Building ${arch}")
         
@@ -484,18 +456,12 @@ elseif(ANDROID)
         file(COPY android/${arch}/bn_conf.h android/${arch}/dso_conf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/include/internal/)
         file(COPY android/${arch}/buildinf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/)
             
-        SET(ssl_SRCS
-            ${COMMON_ssl_SRCS}
-            
-        )
+        add_library(ssl STATIC ${COMMON_ssl_SRCS})
 
-        add_library(ssl STATIC ${ssl_SRCS})
-
-        TARGET_INCLUDE_DIRECTORIES(ssl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} include)
-        TARGET_COMPILE_DEFINITIONS(ssl PRIVATE  OPENSSL_PIC ENGINESDIR="/usr/local/lib/engines-1.1" NDEBUG OPENSSL_USE_NODELETE OPENSSLDIR="/usr/local/ssl")
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC  -pthread")
+        target_include_directories(ssl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} include)
+        target_compile_definitions(ssl PRIVATE  OPENSSL_PIC ENGINESDIR="/usr/local/lib/engines-1.1" NDEBUG OPENSSL_USE_NODELETE OPENSSLDIR="/usr/local/ssl")
         
-        SET(crypto_SRCS
+        set(crypto_SRCS
             ${COMMON_crypto_SRCS}
             crypto/engine/tb_asnmth.c crypto/engine/tb_rsa.c crypto/engine/eng_pkey.c
             crypto/engine/tb_cipher.c crypto/engine/eng_fat.c crypto/chacha/chacha_enc.c
@@ -512,16 +478,20 @@ elseif(ANDROID)
 
         add_library(crypto STATIC ${crypto_SRCS})
 
-        TARGET_INCLUDE_DIRECTORIES(crypto PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} crypto/ec/curve448/arch_32 crypto/include crypto/modes crypto crypto/ec/curve448 include)
-        TARGET_COMPILE_DEFINITIONS(crypto PRIVATE  OPENSSL_PIC ENGINESDIR="/usr/local/lib/engines-1.1" NDEBUG OPENSSL_USE_NODELETE OPENSSLDIR="/usr/local/ssl")
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC  -pthread")
+        target_include_directories(crypto PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} crypto/ec/curve448/arch_32 crypto/include crypto/modes crypto crypto/ec/curve448 include)
+        target_compile_definitions(crypto PRIVATE  OPENSSL_PIC ENGINESDIR="/usr/local/lib/engines-1.1" NDEBUG OPENSSL_USE_NODELETE OPENSSLDIR="/usr/local/ssl")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC  -pthread")
+
     endif() #arm64
 elseif(WIN32)
-    MESSAGE(FATAL_ERROR("Windows is not currently supported"))
+
+    message(FATAL_ERROR("Windows is not currently supported"))
+
 elseif(UNIX)
-    MESSAGE("Generating for Linux clang x86_64")
 
     set(arch "linux-x86_64-clang")
+    message("Building ${arch}")
+
     find_program(PERL_EXECUTABLE perl)
     if(NOT PERL_EXECUTABLE)
         message(FATAL_ERROR("Perl not found"))
@@ -529,27 +499,26 @@ elseif(UNIX)
 
     message("Configuring configdata.pm for \"${arch}\"")
     
-    EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} Configure ${arch} 
-
+    execute_process(COMMAND ${PERL_EXECUTABLE} Configure ${arch} 
             WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
             OUTPUT_VARIABLE TEMP
-            ERROR_VARIABLE ERROR
+            ERROR_VARIABLE error
     )
-    if(ERROR)
-        MESSAGE(FATAL_ERROR("Error while configuring: ${ERROR}"))
-    endif(ERROR)
+    if(error)
+        message(FATAL_ERROR("Error while configuring: ${error}"))
+    endif(error)
 
-    EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} util/mkbuildinf.pl "clang -fPIC -pthread -m64 -Wa,--noexecstack -Qunused-arguments -Wall -O3 -DOPENSSL_USE_NODELETE -DL_ENDIAN -DOPENSSL_PIC -DOPENSSL_CPUID_OBJ -DOPENSSL_IA32_SSE2 -DOPENSSL_BN_ASM_MONT -DOPENSSL_BN_ASM_MONT5 -DOPENSSL_BN_ASM_GF2m -DSHA1_ASM -DSHA256_ASM -DSHA512_ASM -DKECCAK1600_ASM -DRC4_ASM -DMD5_ASM -DVPAES_ASM -DGHASH_ASM -DECP_NISTZ256_ASM -DX25519_ASM -DPOLY1305_ASM -DNDEBUG" "linux-x86_64-clang" 
+    execute_process(COMMAND ${PERL_EXECUTABLE} util/mkbuildinf.pl "clang -fPIC -pthread -m64 -Wa,--noexecstack -Qunused-arguments -Wall -O3 -DOPENSSL_USE_NODELETE -DL_ENDIAN -DOPENSSL_PIC -DOPENSSL_CPUID_OBJ -DOPENSSL_IA32_SSE2 -DOPENSSL_BN_ASM_MONT -DOPENSSL_BN_ASM_MONT5 -DOPENSSL_BN_ASM_GF2m -DSHA1_ASM -DSHA256_ASM -DSHA512_ASM -DKECCAK1600_ASM -DRC4_ASM -DMD5_ASM -DVPAES_ASM -DGHASH_ASM -DECP_NISTZ256_ASM -DX25519_ASM -DPOLY1305_ASM -DNDEBUG" "linux-x86_64-clang" 
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
         OUTPUT_FILE crypto/buildinf.h
-        ERROR_VARIABLE ERROR)
-    if(ERROR)
-        MESSAGE(FATAL_ERROR("Error while generating mkbuildinf: ${ERROR}"))
-    endif(ERROR)
+        ERROR_VARIABLE error)
+    if(error)
+        message(FATAL_ERROR("Error while generating mkbuildinf: ${error}"))
+    endif(error)
 
     foreach(el crypto/include/internal/bn_conf.h;crypto/include/internal/dso_conf.h;include/openssl/opensslconf.h)
-        MESSAGE("Generating ${el}")
-        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE}
+        message("Generating ${el}")
+        execute_process(COMMAND ${PERL_EXECUTABLE}
             "-I${CMAKE_CURRENT_LIST_DIR}" -Mconfigdata "util/dofile.pl" "-oMakefile" ${el}.in
             WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
             OUTPUT_FILE ${el}
@@ -567,8 +536,8 @@ elseif(UNIX)
 
         list(GET PLs ${idx} pl)
         list(GET ASMs ${idx} asm)
-        MESSAGE("Running \"${pl}\" to get \"${asm}\"")
-        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE}
+        message("Running \"${pl}\" to get \"${asm}\"")
+        execute_process(COMMAND ${PERL_EXECUTABLE}
             ${pl} elf ${asm}
             WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
             OUTPUT_VARIABLE temp
@@ -579,18 +548,12 @@ elseif(UNIX)
         endif(error)
     endforeach()
         
-    SET(ssl_SRCS
-        ${COMMON_ssl_SRCS}
-        
-    )
+    add_library(ssl STATIC ${COMMON_ssl_SRCS})
 
-    add_library(ssl STATIC ${ssl_SRCS})
-
-    TARGET_INCLUDE_DIRECTORIES(ssl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} include)
-    TARGET_COMPILE_DEFINITIONS(ssl PRIVATE  ECP_NISTZ256_ASM SHA1_ASM POLY1305_ASM GHASH_ASM ENGINESDIR="/usr/local/lib/engines-1.1" OPENSSL_BN_ASM_MONT5 VPAES_ASM KECCAK1600_ASM L_ENDIAN X25519_ASM NDEBUG OPENSSLDIR="/usr/local/ssl" RC4_ASM MD5_ASM SHA256_ASM OPENSSL_IA32_SSE2 OPENSSL_PIC OPENSSL_BN_ASM_MONT OPENSSL_BN_ASM_GF2m SHA512_ASM OPENSSL_CPUID_OBJ OPENSSL_USE_NODELETE)
-    TARGET_COMPILE_OPTIONS(ssl PRIVATE  -pthread -m64 -Wa,--noexecstack -Qunused-arguments -fPIC)
+    target_include_directories(ssl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} include)
+    target_compile_definitions(ssl PRIVATE  ECP_NISTZ256_ASM SHA1_ASM POLY1305_ASM GHASH_ASM ENGINESDIR="/usr/local/lib/engines-1.1" OPENSSL_BN_ASM_MONT5 VPAES_ASM KECCAK1600_ASM L_ENDIAN X25519_ASM NDEBUG OPENSSLDIR="/usr/local/ssl" RC4_ASM MD5_ASM SHA256_ASM OPENSSL_IA32_SSE2 OPENSSL_PIC OPENSSL_BN_ASM_MONT OPENSSL_BN_ASM_GF2m SHA512_ASM OPENSSL_CPUID_OBJ OPENSSL_USE_NODELETE)
     
-    SET(crypto_SRCS
+    set(crypto_SRCS
         ${COMMON_crypto_SRCS}
         crypto/engine/tb_pkmeth.c crypto/sha/sha512-x86_64.s crypto/engine/eng_table.c
         crypto/ec/ecp_nistz256.c crypto/bn/x86_64-mont.s crypto/engine/tb_dh.c
@@ -616,8 +579,8 @@ elseif(UNIX)
 
     add_library(crypto STATIC ${crypto_SRCS})
 
-    TARGET_INCLUDE_DIRECTORIES(crypto PRIVATE crypto/include include ${CMAKE_CURRENT_SOURCE_DIR} crypto crypto/ec/curve448 crypto/modes crypto/ec/curve448/arch_32)
-    TARGET_COMPILE_DEFINITIONS(crypto PRIVATE  ECP_NISTZ256_ASM SHA1_ASM POLY1305_ASM GHASH_ASM ENGINESDIR="/usr/local/lib/engines-1.1" OPENSSL_BN_ASM_MONT5 VPAES_ASM KECCAK1600_ASM L_ENDIAN X25519_ASM NDEBUG OPENSSLDIR="/usr/local/ssl" RC4_ASM MD5_ASM SHA256_ASM OPENSSL_IA32_SSE2 OPENSSL_PIC OPENSSL_BN_ASM_MONT OPENSSL_BN_ASM_GF2m SHA512_ASM OPENSSL_CPUID_OBJ OPENSSL_USE_NODELETE)
-    TARGET_COMPILE_OPTIONS(crypto PRIVATE  -pthread -m64 -Wa,--noexecstack -Qunused-arguments -fPIC)
+    target_include_directories(crypto PRIVATE crypto/include include ${CMAKE_CURRENT_SOURCE_DIR} crypto crypto/ec/curve448 crypto/modes crypto/ec/curve448/arch_32)
+    target_compile_definitions(crypto PRIVATE  ECP_NISTZ256_ASM SHA1_ASM POLY1305_ASM GHASH_ASM ENGINESDIR="/usr/local/lib/engines-1.1" OPENSSL_BN_ASM_MONT5 VPAES_ASM KECCAK1600_ASM L_ENDIAN X25519_ASM NDEBUG OPENSSLDIR="/usr/local/ssl" RC4_ASM MD5_ASM SHA256_ASM OPENSSL_IA32_SSE2 OPENSSL_PIC OPENSSL_BN_ASM_MONT OPENSSL_BN_ASM_GF2m SHA512_ASM OPENSSL_CPUID_OBJ OPENSSL_USE_NODELETE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -m64 -Wa,--noexecstack -Qunused-arguments -fPIC")
 endif()
 
