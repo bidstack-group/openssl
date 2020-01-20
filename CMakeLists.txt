@@ -131,7 +131,7 @@ set(COMMON_crypto_SRCS
     crypto/bn/bn_blind.c crypto/ec/ec_print.c crypto/mem_dbg.c crypto/des/fcrypt_b.c crypto/x509/x_x509a.c crypto/modes/ocb128.c
 )
 
-function(pls_to_asms PLs ASMs ARCH)
+function(pls_to_asms PLs ASMs ARG ARCH)
     list(LENGTH ASMs asms_len)
     list(LENGTH PLs pls_len)
 
@@ -145,7 +145,7 @@ function(pls_to_asms PLs ASMs ARCH)
         list(GET ASMs ${idx} asm)
         MESSAGE("Running \"${pl}\" to get \"${asm}\"")
         execute_process(COMMAND ${PERL_EXECUTABLE}
-            ${pl} macosx ${asm}
+            ${pl} ${ARG} ${asm}
             WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
             OUTPUT_VARIABLE temp
             ERROR_VARIABLE error
@@ -248,7 +248,7 @@ elseif(CMAKE_OSX_SYSROOT MATCHES MacOSX)
 
     set(PLs crypto/aes/asm/aesni-mb-x86_64.pl crypto/aes/asm/aesni-sha1-x86_64.pl crypto/aes/asm/aesni-sha256-x86_64.pl crypto/aes/asm/aesni-x86_64.pl crypto/aes/asm/vpaes-x86_64.pl crypto/bn/asm/rsaz-avx2.pl crypto/bn/asm/rsaz-x86_64.pl crypto/bn/asm/x86_64-gf2m.pl crypto/bn/asm/x86_64-mont.pl crypto/bn/asm/x86_64-mont5.pl crypto/camellia/asm/cmll-x86_64.pl crypto/chacha/asm/chacha-x86_64.pl crypto/ec/asm/ecp_nistz256-x86_64.pl crypto/ec/asm/x25519-x86_64.pl crypto/md5/asm/md5-x86_64.pl crypto/modes/asm/aesni-gcm-x86_64.pl crypto/modes/asm/ghash-x86_64.pl crypto/poly1305/asm/poly1305-x86_64.pl crypto/rc4/asm/rc4-md5-x86_64.pl crypto/rc4/asm/rc4-x86_64.pl crypto/sha/asm/keccak1600-x86_64.pl crypto/sha/asm/sha1-mb-x86_64.pl crypto/sha/asm/sha1-x86_64.pl crypto/sha/asm/sha256-mb-x86_64.pl crypto/sha/asm/sha512-x86_64.pl crypto/sha/asm/sha512-x86_64.pl crypto/whrlpool/asm/wp-x86_64.pl crypto/x86_64cpuid.pl engines/asm/e_padlock-x86_64.pl)
     set(ASMs crypto/aes/aesni-mb-x86_64.s crypto/aes/aesni-sha1-x86_64.s crypto/aes/aesni-sha256-x86_64.s crypto/aes/aesni-x86_64.s crypto/aes/vpaes-x86_64.s crypto/bn/rsaz-avx2.s crypto/bn/rsaz-x86_64.s crypto/bn/x86_64-gf2m.s crypto/bn/x86_64-mont.s crypto/bn/x86_64-mont5.s crypto/camellia/cmll-x86_64.s crypto/chacha/chacha-x86_64.s crypto/ec/ecp_nistz256-x86_64.s crypto/ec/x25519-x86_64.s crypto/md5/md5-x86_64.s crypto/modes/aesni-gcm-x86_64.s crypto/modes/ghash-x86_64.s crypto/poly1305/poly1305-x86_64.s crypto/rc4/rc4-md5-x86_64.s crypto/rc4/rc4-x86_64.s crypto/sha/keccak1600-x86_64.s crypto/sha/sha1-mb-x86_64.s crypto/sha/sha1-x86_64.s crypto/sha/sha256-mb-x86_64.s crypto/sha/sha256-x86_64.s crypto/sha/sha512-x86_64.s crypto/whrlpool/wp-x86_64.s crypto/x86_64cpuid.s engines/e_padlock-x86_64.s)
-    pls_to_asms(${PLs} ${ASMs} ${arch})
+    pls_to_asms(${PLs} ${ASMs} macosx ${arch})
 
     add_library(ssl STATIC ${COMMON_ssl_SRCS})
 
@@ -514,7 +514,7 @@ elseif(UNIX)
     
     set(PLs crypto/aes/asm/aesni-mb-x86_64.pl crypto/aes/asm/aesni-sha1-x86_64.pl crypto/aes/asm/aesni-sha256-x86_64.pl crypto/aes/asm/aesni-x86_64.pl crypto/aes/asm/vpaes-x86_64.pl crypto/bn/asm/rsaz-avx2.pl crypto/bn/asm/rsaz-x86_64.pl crypto/bn/asm/x86_64-gf2m.pl crypto/bn/asm/x86_64-mont.pl crypto/bn/asm/x86_64-mont5.pl crypto/camellia/asm/cmll-x86_64.pl crypto/chacha/asm/chacha-x86_64.pl crypto/ec/asm/ecp_nistz256-x86_64.pl crypto/ec/asm/x25519-x86_64.pl crypto/md5/asm/md5-x86_64.pl crypto/modes/asm/aesni-gcm-x86_64.pl crypto/modes/asm/ghash-x86_64.pl crypto/poly1305/asm/poly1305-x86_64.pl crypto/rc4/asm/rc4-md5-x86_64.pl crypto/rc4/asm/rc4-x86_64.pl crypto/sha/asm/keccak1600-x86_64.pl crypto/sha/asm/sha1-mb-x86_64.pl crypto/sha/asm/sha1-x86_64.pl crypto/sha/asm/sha256-mb-x86_64.pl crypto/sha/asm/sha512-x86_64.pl crypto/sha/asm/sha512-x86_64.pl crypto/whrlpool/asm/wp-x86_64.pl crypto/x86_64cpuid.pl engines/asm/e_padlock-x86_64.pl)
     set(ASMs crypto/aes/aesni-mb-x86_64.s crypto/aes/aesni-sha1-x86_64.s crypto/aes/aesni-sha256-x86_64.s crypto/aes/aesni-x86_64.s crypto/aes/vpaes-x86_64.s crypto/bn/rsaz-avx2.s crypto/bn/rsaz-x86_64.s crypto/bn/x86_64-gf2m.s crypto/bn/x86_64-mont.s crypto/bn/x86_64-mont5.s crypto/camellia/cmll-x86_64.s crypto/chacha/chacha-x86_64.s crypto/ec/ecp_nistz256-x86_64.s crypto/ec/x25519-x86_64.s crypto/md5/md5-x86_64.s crypto/modes/aesni-gcm-x86_64.s crypto/modes/ghash-x86_64.s crypto/poly1305/poly1305-x86_64.s crypto/rc4/rc4-md5-x86_64.s crypto/rc4/rc4-x86_64.s crypto/sha/keccak1600-x86_64.s crypto/sha/sha1-mb-x86_64.s crypto/sha/sha1-x86_64.s crypto/sha/sha256-mb-x86_64.s crypto/sha/sha256-x86_64.s crypto/sha/sha512-x86_64.s crypto/whrlpool/wp-x86_64.s crypto/x86_64cpuid.s engines/e_padlock-x86_64.s)
-    pls_to_asms(${PLs} ${ASMs} ${arch})
+    pls_to_asms(${PLs} ${ASMs} elf ${arch})
         
     add_library(ssl STATIC ${COMMON_ssl_SRCS})
 
