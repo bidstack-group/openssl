@@ -25,7 +25,8 @@ set(COMMON_ssl_SRCS
     ssl/ssl_conf.c ssl/ssl_sess.c
     ssl/statem/extensions_cust.c ssl/ssl_mcnf.c
     ssl/record/ssl3_record_tls13.c ssl/s3_cbc.c
-    )
+)
+
 set(COMMON_crypto_SRCS
     crypto/bn/bn_ctx.c crypto/rsa/rsa_gen.c crypto/conf/conf_sap.c crypto/ec/ec_mult.c crypto/x509/x_exten.c crypto/ec/ec_check.c
     crypto/evp/pmeth_fn.c crypto/ec/ecp_oct.c crypto/hmac/hmac.c crypto/bn/bn_lib.c crypto/ui/ui_null.c crypto/des/set_key.c
@@ -128,38 +129,36 @@ set(COMMON_crypto_SRCS
     crypto/idea/i_cbc.c crypto/hmac/hm_pmeth.c crypto/idea/i_skey.c crypto/bf/bf_enc.c crypto/asn1/a_i2d_fp.c crypto/pem/pem_info.c
     crypto/x509v3/v3_ncons.c crypto/ec/ec_err.c crypto/store/store_lib.c crypto/evp/pmeth_lib.c crypto/dh/dh_asn1.c crypto/init.c
     crypto/bn/bn_blind.c crypto/ec/ec_print.c crypto/mem_dbg.c crypto/des/fcrypt_b.c crypto/x509/x_x509a.c crypto/modes/ocb128.c
-    )
+)
 
-if(CMAKE_OSX_SYSROOT MATCHES iPhoneSimulator)
+function(pls_to_asms PLs ASMs ARCH)
+    list(LENGTH ASMs asms_len)
+    list(LENGTH PLs pls_len)
 
-        set(arch "iossimulator-xcrun")
-        message("Building ${arch}")
-    
-        find_program(PERL_EXECUTABLE perl)
-        if(NOT PERL_EXECUTABLE)
-            message(FATAL_ERROR("Perl not found"))
-        endif(NOT PERL_EXECUTABLE)
+    if(NOT ${pls_len} EQUAL ${asms_len})
+        message(FATAL_ERROR("Length of list of scripts (${pls_len}) is not equal to length of a list of .s files (${asms_len})."))
+    endif(NOT ${pls_len} EQUAL ${asms_len})
 
-        message("Configuring configdata.pm for \"${arch}\"")
-        execute_process(COMMAND ${PERL_EXECUTABLE} Configure ${arch}  no-asm
-                WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-                OUTPUT_VARIABLE TEMP
-                ERROR_VARIABLE error
+    math(EXPR len "${pls_len}-1")
+    foreach(idx RANGE ${len})
+        list(GET PLs ${idx} pl)
+        list(GET ASMs ${idx} asm)
+        MESSAGE("Running \"${pl}\" to get \"${asm}\"")
+        execute_process(COMMAND ${PERL_EXECUTABLE}
+            ${pl} macosx ${asm}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+            OUTPUT_VARIABLE temp
+            ERROR_VARIABLE error
         )
         if(error)
-            message(FATAL_ERROR("Error while configuring: ${error}"))
+            message(FATAL_ERROR("Error while generating ${pl} -> ${asm}: ${error}"))
         endif(error)
+    endforeach()
+endfunction(pls_to_asms)
 
-        execute_process(COMMAND ${PERL_EXECUTABLE} util/mkbuildinf.pl "xcrun -sdk iphonesimulator cc -fPIC  -O3 -DOPENSSL_PIC -D_REENTRANT -DNDEBUG" "iossimulator-xcrun" 
-            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-            OUTPUT_FILE crypto/buildinf.h
-            ERROR_VARIABLE error)
-        if(error)
-            message(FATAL_ERROR("Error while generating mkbuildinf: ${error}"))
-        endif(error)
-
+function(generate_headers arch)
         foreach(el crypto/include/internal/bn_conf.h;crypto/include/internal/dso_conf.h;include/openssl/opensslconf.h)
-            message("Generating ${el}")
+            message("Generating ${el} for ${arch}")
             execute_process(COMMAND ${PERL_EXECUTABLE}
                 "-I${CMAKE_CURRENT_LIST_DIR}" -Mconfigdata "util/dofile.pl" "-oMakefile" ${el}.in
                 WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
@@ -169,6 +168,37 @@ if(CMAKE_OSX_SYSROOT MATCHES iPhoneSimulator)
                 message(FATAL_ERROR("Error while generating: ${error}"))
             endif(error)
         endforeach()
+endfunction(generate_headers)
+
+if(CMAKE_OSX_SYSROOT MATCHES iPhoneSimulator)
+
+    set(arch "iossimulator-xcrun")
+    message("Building ${arch}")
+
+    find_program(PERL_EXECUTABLE perl)
+    if(NOT PERL_EXECUTABLE)
+        message(FATAL_ERROR("Perl not found"))
+    endif(NOT PERL_EXECUTABLE)
+
+    message("Configuring configdata.pm for \"${arch}\"")
+    execute_process(COMMAND ${PERL_EXECUTABLE} Configure ${arch}  no-asm
+            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+            OUTPUT_VARIABLE TEMP
+            ERROR_VARIABLE error
+    )
+    if(error)
+        message(FATAL_ERROR("Error while configuring: ${error}"))
+    endif(error)
+
+    execute_process(COMMAND ${PERL_EXECUTABLE} util/mkbuildinf.pl "xcrun -sdk iphonesimulator cc -fPIC  -O3 -DOPENSSL_PIC -D_REENTRANT -DNDEBUG" "iossimulator-xcrun" 
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+        OUTPUT_FILE crypto/buildinf.h
+        ERROR_VARIABLE error)
+    if(error)
+        message(FATAL_ERROR("Error while generating mkbuildinf: ${error}"))
+    endif(error)
+
+    generate_headers(${arch})
         
     add_library(ssl STATIC ${COMMON_ssl_SRCS})
     target_include_directories(ssl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} include)
@@ -214,38 +244,12 @@ elseif(CMAKE_OSX_SYSROOT MATCHES MacOSX)
         message(FATAL_ERROR("Error while generating mkbuildinf: ${error}"))
     endif(error)
 
-    foreach(el crypto/include/internal/bn_conf.h;crypto/include/internal/dso_conf.h;include/openssl/opensslconf.h)
-        message("Generating ${el}")
-        execute_process(COMMAND ${PERL_EXECUTABLE}
-            "-I${CMAKE_CURRENT_LIST_DIR}" -Mconfigdata "util/dofile.pl" "-oMakefile" ${el}.in
-            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-            OUTPUT_FILE ${el}
-            ERROR_VARIABLE error)
-        if(error)
-            message(FATAL_ERROR("Error while generating: ${error}"))
-        endif(error)
-    endforeach()
-    
+    generate_headers(${arch})
+
     set(PLs crypto/aes/asm/aesni-mb-x86_64.pl crypto/aes/asm/aesni-sha1-x86_64.pl crypto/aes/asm/aesni-sha256-x86_64.pl crypto/aes/asm/aesni-x86_64.pl crypto/aes/asm/vpaes-x86_64.pl crypto/bn/asm/rsaz-avx2.pl crypto/bn/asm/rsaz-x86_64.pl crypto/bn/asm/x86_64-gf2m.pl crypto/bn/asm/x86_64-mont.pl crypto/bn/asm/x86_64-mont5.pl crypto/camellia/asm/cmll-x86_64.pl crypto/chacha/asm/chacha-x86_64.pl crypto/ec/asm/ecp_nistz256-x86_64.pl crypto/ec/asm/x25519-x86_64.pl crypto/md5/asm/md5-x86_64.pl crypto/modes/asm/aesni-gcm-x86_64.pl crypto/modes/asm/ghash-x86_64.pl crypto/poly1305/asm/poly1305-x86_64.pl crypto/rc4/asm/rc4-md5-x86_64.pl crypto/rc4/asm/rc4-x86_64.pl crypto/sha/asm/keccak1600-x86_64.pl crypto/sha/asm/sha1-mb-x86_64.pl crypto/sha/asm/sha1-x86_64.pl crypto/sha/asm/sha256-mb-x86_64.pl crypto/sha/asm/sha512-x86_64.pl crypto/sha/asm/sha512-x86_64.pl crypto/whrlpool/asm/wp-x86_64.pl crypto/x86_64cpuid.pl engines/asm/e_padlock-x86_64.pl)
     set(ASMs crypto/aes/aesni-mb-x86_64.s crypto/aes/aesni-sha1-x86_64.s crypto/aes/aesni-sha256-x86_64.s crypto/aes/aesni-x86_64.s crypto/aes/vpaes-x86_64.s crypto/bn/rsaz-avx2.s crypto/bn/rsaz-x86_64.s crypto/bn/x86_64-gf2m.s crypto/bn/x86_64-mont.s crypto/bn/x86_64-mont5.s crypto/camellia/cmll-x86_64.s crypto/chacha/chacha-x86_64.s crypto/ec/ecp_nistz256-x86_64.s crypto/ec/x25519-x86_64.s crypto/md5/md5-x86_64.s crypto/modes/aesni-gcm-x86_64.s crypto/modes/ghash-x86_64.s crypto/poly1305/poly1305-x86_64.s crypto/rc4/rc4-md5-x86_64.s crypto/rc4/rc4-x86_64.s crypto/sha/keccak1600-x86_64.s crypto/sha/sha1-mb-x86_64.s crypto/sha/sha1-x86_64.s crypto/sha/sha256-mb-x86_64.s crypto/sha/sha256-x86_64.s crypto/sha/sha512-x86_64.s crypto/whrlpool/wp-x86_64.s crypto/x86_64cpuid.s engines/e_padlock-x86_64.s)
-    list(LENGTH PLs _len)
-    math(EXPR len "${_len}-1")
-    foreach(idx RANGE ${len})
+    pls_to_asms(${PLs} ${ASMs} ${arch})
 
-        list(GET PLs ${idx} pl)
-        list(GET ASMs ${idx} asm)
-        MESSAGE("Running \"${pl}\" to get \"${asm}\"")
-        execute_process(COMMAND ${PERL_EXECUTABLE}
-            ${pl} macosx ${asm}
-            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-            OUTPUT_VARIABLE temp
-            ERROR_VARIABLE error
-        )
-        if(error)
-            message(FATAL_ERROR("Error while generating: ${error}"))
-        endif(error)
-    endforeach()
-        
     add_library(ssl STATIC ${COMMON_ssl_SRCS})
 
     target_include_directories(ssl PRIVATE include ${CMAKE_CURRENT_SOURCE_DIR})
@@ -309,17 +313,7 @@ elseif(CMAKE_OSX_SYSROOT MATCHES iPhoneOS)
         message(FATAL_ERROR("Error while generating mkbuildinf: ${error}"))
     endif(error)
 
-    foreach(el crypto/include/internal/bn_conf.h;crypto/include/internal/dso_conf.h;include/openssl/opensslconf.h)
-        message("Generating ${el}")
-        execute_process(COMMAND ${PERL_EXECUTABLE}
-            "-I${CMAKE_CURRENT_LIST_DIR}" -Mconfigdata "util/dofile.pl" "-oMakefile" ${el}.in
-            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-            OUTPUT_FILE ${el}
-            ERROR_VARIABLE error)
-        if(error)
-            message(FATAL_ERROR("Error while generating: ${error}"))
-        endif(error)
-    endforeach()
+    generate_headers(${arch})
     
     add_library(ssl STATIC ${COMMON_ssl_SRCS})
 
@@ -516,37 +510,11 @@ elseif(UNIX)
         message(FATAL_ERROR("Error while generating mkbuildinf: ${error}"))
     endif(error)
 
-    foreach(el crypto/include/internal/bn_conf.h;crypto/include/internal/dso_conf.h;include/openssl/opensslconf.h)
-        message("Generating ${el}")
-        execute_process(COMMAND ${PERL_EXECUTABLE}
-            "-I${CMAKE_CURRENT_LIST_DIR}" -Mconfigdata "util/dofile.pl" "-oMakefile" ${el}.in
-            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-            OUTPUT_FILE ${el}
-            ERROR_VARIABLE error)
-        if(error)
-            message(FATAL_ERROR("Error while generating: ${error}"))
-        endif(error)
-    endforeach()
+    generate_headers(${arch})
     
     set(PLs crypto/aes/asm/aesni-mb-x86_64.pl crypto/aes/asm/aesni-sha1-x86_64.pl crypto/aes/asm/aesni-sha256-x86_64.pl crypto/aes/asm/aesni-x86_64.pl crypto/aes/asm/vpaes-x86_64.pl crypto/bn/asm/rsaz-avx2.pl crypto/bn/asm/rsaz-x86_64.pl crypto/bn/asm/x86_64-gf2m.pl crypto/bn/asm/x86_64-mont.pl crypto/bn/asm/x86_64-mont5.pl crypto/camellia/asm/cmll-x86_64.pl crypto/chacha/asm/chacha-x86_64.pl crypto/ec/asm/ecp_nistz256-x86_64.pl crypto/ec/asm/x25519-x86_64.pl crypto/md5/asm/md5-x86_64.pl crypto/modes/asm/aesni-gcm-x86_64.pl crypto/modes/asm/ghash-x86_64.pl crypto/poly1305/asm/poly1305-x86_64.pl crypto/rc4/asm/rc4-md5-x86_64.pl crypto/rc4/asm/rc4-x86_64.pl crypto/sha/asm/keccak1600-x86_64.pl crypto/sha/asm/sha1-mb-x86_64.pl crypto/sha/asm/sha1-x86_64.pl crypto/sha/asm/sha256-mb-x86_64.pl crypto/sha/asm/sha512-x86_64.pl crypto/sha/asm/sha512-x86_64.pl crypto/whrlpool/asm/wp-x86_64.pl crypto/x86_64cpuid.pl engines/asm/e_padlock-x86_64.pl)
     set(ASMs crypto/aes/aesni-mb-x86_64.s crypto/aes/aesni-sha1-x86_64.s crypto/aes/aesni-sha256-x86_64.s crypto/aes/aesni-x86_64.s crypto/aes/vpaes-x86_64.s crypto/bn/rsaz-avx2.s crypto/bn/rsaz-x86_64.s crypto/bn/x86_64-gf2m.s crypto/bn/x86_64-mont.s crypto/bn/x86_64-mont5.s crypto/camellia/cmll-x86_64.s crypto/chacha/chacha-x86_64.s crypto/ec/ecp_nistz256-x86_64.s crypto/ec/x25519-x86_64.s crypto/md5/md5-x86_64.s crypto/modes/aesni-gcm-x86_64.s crypto/modes/ghash-x86_64.s crypto/poly1305/poly1305-x86_64.s crypto/rc4/rc4-md5-x86_64.s crypto/rc4/rc4-x86_64.s crypto/sha/keccak1600-x86_64.s crypto/sha/sha1-mb-x86_64.s crypto/sha/sha1-x86_64.s crypto/sha/sha256-mb-x86_64.s crypto/sha/sha256-x86_64.s crypto/sha/sha512-x86_64.s crypto/whrlpool/wp-x86_64.s crypto/x86_64cpuid.s engines/e_padlock-x86_64.s)
-    list(LENGTH PLs _len)
-    math(EXPR len "${_len}-1")
-    foreach(idx RANGE ${len})
-
-        list(GET PLs ${idx} pl)
-        list(GET ASMs ${idx} asm)
-        message("Running \"${pl}\" to get \"${asm}\"")
-        execute_process(COMMAND ${PERL_EXECUTABLE}
-            ${pl} elf ${asm}
-            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-            OUTPUT_VARIABLE temp
-            ERROR_VARIABLE error
-        )
-        if(error)
-            message(FATAL_ERROR("Error while generating: ${error}"))
-        endif(error)
-    endforeach()
+    pls_to_asms(${PLs} ${ASMs} ${arch})
         
     add_library(ssl STATIC ${COMMON_ssl_SRCS})
 
