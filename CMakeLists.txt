@@ -292,8 +292,8 @@ elseif(CMAKE_OSX_SYSROOT MATCHES MacOSX)
 
     target_include_directories(crypto PRIVATE crypto/modes include ${CMAKE_CURRENT_SOURCE_DIR} crypto/ec/curve448/arch_32 crypto crypto/include crypto/ec/curve448)
     target_compile_definitions(crypto PRIVATE  MD5_ASM POLY1305_ASM X25519_ASM RC4_ASM OPENSSL_CPUID_OBJ OPENSSLDIR="/usr/local/ssl" ECP_NISTZ256_ASM VPAES_ASM SHA256_ASM OPENSSL_BN_ASM_MONT5 _REENTRANT OPENSSL_IA32_SSE2 SHA1_ASM OPENSSL_PIC SHA512_ASM L_ENDIAN GHASH_ASM ENGINESDIR="/usr/local/lib/engines-1.1" KECCAK1600_ASM OPENSSL_BN_ASM_MONT OPENSSL_BN_ASM_GF2m)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mios-version-min=7.0.0 -fno-common -fPIC ")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mios-version-min=7.0.0 -fno-common -fPIC ")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-common -fPIC ")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-common -fPIC ")
     set_clang_unused()
 
 elseif(CMAKE_OSX_SYSROOT MATCHES iPhoneOS)
