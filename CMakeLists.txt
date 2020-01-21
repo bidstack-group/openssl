@@ -341,7 +341,7 @@ elseif(CMAKE_OSX_SYSROOT MATCHES iPhoneOS)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mios-version-min=7.0.0 -fno-common -fPIC ")
         
 elseif(ANDROID)
-    IF(${ANDROID_ABI} STREQUAL "x86_64")
+    if(${ANDROID_ABI} STREQUAL "x86_64")
 
         set(arch "android-x86_64")
         message("Building ${arch}")
@@ -366,7 +366,7 @@ elseif(ANDROID)
         target_compile_definitions(crypto PRIVATE OPENSSL_USE_NODELETE OPENSSL_PIC ENGINESDIR="/usr/local/lib/engines-1.1" OPENSSLDIR="/usr/local/ssl")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -pthread ")
 
-    ELSEIF(${ANDROID_ABI} STREQUAL "x86")
+    elseif(${ANDROID_ABI} STREQUAL "x86")
 
         set(arch "android-x86")
         message("Building ${arch}")
@@ -391,7 +391,7 @@ elseif(ANDROID)
         target_compile_definitions(crypto PRIVATE  ENGINESDIR="/usr/local/lib/engines-1.1" OPENSSL_PIC OPENSSLDIR="/usr/local/ssl" OPENSSL_USE_NODELETE)
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fomit-frame-pointer -pthread  -fPIC")
         
-    ELSEIF(${ANDROID_ABI} STREQUAL "armeabi-v7a")
+    elseif(${ANDROID_ABI} STREQUAL "armeabi-v7a")
 
         set(arch "android-arm")
         message("Building ${arch}")
@@ -416,7 +416,7 @@ elseif(ANDROID)
         target_compile_definitions(crypto PRIVATE OPENSSL_PIC OPENSSLDIR="/usr/local/ssl" OPENSSL_USE_NODELETE ENGINESDIR="/usr/local/lib/engines-1.1")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -pthread -fPIC")
 
-    ELSEIF(${ANDROID_ABI} STREQUAL "arm64-v8a")
+    elseif(${ANDROID_ABI} STREQUAL "arm64-v8a")
 
         set(arch "android-arm64")
         message("Building ${arch}")
