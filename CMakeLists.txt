@@ -238,8 +238,8 @@ if(CMAKE_OSX_SYSROOT MATCHES iPhoneSimulator)
     add_library(crypto STATIC ${crypto_SRCS})
     target_include_directories(crypto PRIVATE crypto/modes ${CMAKE_CURRENT_SOURCE_DIR} crypto/ec/curve448/arch_32 crypto/include crypto/ec/curve448 crypto include)
     target_compile_definitions(crypto PRIVATE  ENGINESDIR="/usr/local/lib/engines-1.1" _REENTRANT OPENSSLDIR="/usr/local/ssl" OPENSSL_PIC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -sdk iphonesimulator -fPIC -mios-version-min=7.0.0")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}      -sdk iphonesimulator -fPIC -mios-version-min=7.0.0")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -fPIC -mios-version-min=7.0.0")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -mios-version-min=7.0.0")
     
 elseif(CMAKE_OSX_SYSROOT MATCHES MacOSX)
 
