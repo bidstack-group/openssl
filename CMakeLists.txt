@@ -145,12 +145,11 @@ set(crypto_SRC_android_ios
 )
 
 function(set_clang_unused) 
-    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    if(CMAKE_C_COMPILER_ID MATCHES "Clang")
         #suppresses warnings for incompatible defines and flags (-MT, -MF) when compiling assembly files
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Qunused-arguments" PARENT_SCOPE)
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Qunused-arguments" PARENT_SCOPE)
         set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -Qunused-arguments" PARENT_SCOPE)
-    endif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    endif(CMAKE_C_COMPILER_ID MATCHES "Clang")
 endfunction(set_clang_unused) 
 
 function(generate_configdata ARCH)
@@ -168,11 +167,11 @@ endfunction(generate_configdata)
 function(generate_mkbuildinf ARG ARCH)
     message("Generating mkbuildinf for ${ARCH}")
 
-    set(Args "${ARG} ${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
+    set(Args "${ARG} ${CMAKE_C_FLAGS}")
     if(${CMAKE_BUILD_TYPE} MATCHES Debug)
-        set(Args "${Args} ${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_C_FLAGS_RELEASE}")
+        set(Args "${Args} ${CMAKE_C_FLAGS_RELEASE}")
     elseif(${CMAKE_BUILD_TYPE} MATCHES Release)
-        set(Args "${Args} ${CMAKE_CXX_FLAGS_DEBUG} ${CMAKE_C_FLAGS_RELEASE}")
+        set(Args "${Args} ${CMAKE_C_FLAGS_RELEASE}")
     endif(${CMAKE_BUILD_TYPE} MATCHES Debug)
     #message(FATAL_ERROR("Args to configdata.pm: ${Args} ${ARCH}"))
 
@@ -251,7 +250,6 @@ if(CMAKE_OSX_SYSROOT MATCHES iPhoneSimulator)
     add_library(crypto STATIC ${crypto_SRCS})
     target_include_directories(crypto PRIVATE crypto/modes ${CMAKE_CURRENT_SOURCE_DIR} crypto/ec/curve448/arch_32 crypto/include crypto/ec/curve448 crypto include)
     target_compile_definitions(crypto PRIVATE  ENGINESDIR="/usr/local/lib/engines-1.1" _REENTRANT OPENSSLDIR="/usr/local/ssl" OPENSSL_PIC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -fPIC -mios-version-min=7.0.0")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -mios-version-min=7.0.0")
     
 elseif(CMAKE_OSX_SYSROOT MATCHES MacOSX)
@@ -305,7 +303,6 @@ elseif(CMAKE_OSX_SYSROOT MATCHES MacOSX)
 
     target_include_directories(crypto PRIVATE crypto/modes include ${CMAKE_CURRENT_SOURCE_DIR} crypto/ec/curve448/arch_32 crypto crypto/include crypto/ec/curve448)
     target_compile_definitions(crypto PRIVATE  MD5_ASM POLY1305_ASM X25519_ASM RC4_ASM OPENSSL_CPUID_OBJ OPENSSLDIR="/usr/local/ssl" ECP_NISTZ256_ASM VPAES_ASM SHA256_ASM OPENSSL_BN_ASM_MONT5 _REENTRANT OPENSSL_IA32_SSE2 SHA1_ASM OPENSSL_PIC SHA512_ASM L_ENDIAN GHASH_ASM ENGINESDIR="/usr/local/lib/engines-1.1" KECCAK1600_ASM OPENSSL_BN_ASM_MONT OPENSSL_BN_ASM_GF2m)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-common -fPIC ")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-common -fPIC ")
     set_clang_unused()
 
@@ -341,7 +338,6 @@ elseif(CMAKE_OSX_SYSROOT MATCHES iPhoneOS)
 
     target_include_directories(crypto PRIVATE crypto/ec/curve448/arch_32 crypto/include include ${CMAKE_CURRENT_SOURCE_DIR} crypto/modes crypto/ec/curve448 crypto)
     target_compile_definitions(crypto PRIVATE  _REENTRANT OPENSSLDIR="/usr/local/ssl" ENGINESDIR="/usr/local/lib/engines-1.1" OPENSSL_PIC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mios-version-min=7.0.0 -fno-common -fPIC ")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mios-version-min=7.0.0 -fno-common -fPIC ")
         
 elseif(ANDROID)
@@ -368,7 +364,6 @@ elseif(ANDROID)
 
         target_include_directories(crypto PRIVATE crypto/modes crypto crypto/ec/curve448 crypto/include ${CMAKE_CURRENT_SOURCE_DIR} include crypto/ec/curve448/arch_32)
         target_compile_definitions(crypto PRIVATE OPENSSL_USE_NODELETE OPENSSL_PIC ENGINESDIR="/usr/local/lib/engines-1.1" OPENSSLDIR="/usr/local/ssl")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -pthread ")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -pthread ")
 
     ELSEIF(${ANDROID_ABI} STREQUAL "x86")
@@ -394,7 +389,6 @@ elseif(ANDROID)
 
         target_include_directories(crypto PRIVATE crypto/ec/curve448/arch_32 crypto/modes ${CMAKE_CURRENT_SOURCE_DIR} include crypto/ec/curve448 crypto crypto/include)
         target_compile_definitions(crypto PRIVATE  ENGINESDIR="/usr/local/lib/engines-1.1" OPENSSL_PIC OPENSSLDIR="/usr/local/ssl" OPENSSL_USE_NODELETE)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fomit-frame-pointer -pthread  -fPIC")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fomit-frame-pointer -pthread  -fPIC")
         
     ELSEIF(${ANDROID_ABI} STREQUAL "armeabi-v7a")
@@ -420,7 +414,6 @@ elseif(ANDROID)
 
         target_include_directories(crypto PRIVATE crypto/include crypto crypto/modes ${CMAKE_CURRENT_SOURCE_DIR} crypto/ec/curve448/arch_32 crypto/ec/curve448 include)
         target_compile_definitions(crypto PRIVATE OPENSSL_PIC OPENSSLDIR="/usr/local/ssl" OPENSSL_USE_NODELETE ENGINESDIR="/usr/local/lib/engines-1.1")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -pthread -fPIC")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -pthread -fPIC")
 
     ELSEIF(${ANDROID_ABI} STREQUAL "arm64-v8a")
@@ -446,7 +439,6 @@ elseif(ANDROID)
 
         target_include_directories(crypto PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} crypto/ec/curve448/arch_32 crypto/include crypto/modes crypto crypto/ec/curve448 include)
         target_compile_definitions(crypto PRIVATE  OPENSSL_PIC ENGINESDIR="/usr/local/lib/engines-1.1" OPENSSL_USE_NODELETE OPENSSLDIR="/usr/local/ssl")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC  -pthread")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC  -pthread")
 
     endif() #arm64
@@ -505,7 +497,6 @@ elseif(UNIX)
 
     target_include_directories(crypto PRIVATE crypto/include include ${CMAKE_CURRENT_SOURCE_DIR} crypto crypto/ec/curve448 crypto/modes crypto/ec/curve448/arch_32)
     target_compile_definitions(crypto PRIVATE  ECP_NISTZ256_ASM SHA1_ASM POLY1305_ASM GHASH_ASM ENGINESDIR="/usr/local/lib/engines-1.1" OPENSSL_BN_ASM_MONT5 VPAES_ASM KECCAK1600_ASM L_ENDIAN X25519_ASM OPENSSLDIR="/usr/local/ssl" RC4_ASM MD5_ASM SHA256_ASM OPENSSL_IA32_SSE2 OPENSSL_PIC OPENSSL_BN_ASM_MONT OPENSSL_BN_ASM_GF2m SHA512_ASM OPENSSL_CPUID_OBJ OPENSSL_USE_NODELETE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -m64 -Wa,--noexecstack -fPIC")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -m64 -Wa,--noexecstack -fPIC")
     set_clang_unused()
 endif()
