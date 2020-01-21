@@ -131,6 +131,19 @@ set(COMMON_crypto_SRCS
     crypto/bn/bn_blind.c crypto/ec/ec_print.c crypto/mem_dbg.c crypto/des/fcrypt_b.c crypto/x509/x_x509a.c crypto/modes/ocb128.c
 )
 
+set(crypto_SRC_android_ios
+    crypto/engine/eng_all.c crypto/rc4/rc4_enc.c crypto/camellia/camellia.c 
+    crypto/engine/eng_rdrand.c crypto/engine/tb_cipher.c crypto/camellia/cmll_cbc.c 
+    crypto/engine/eng_cnf.c crypto/engine/eng_openssl.c crypto/engine/tb_rand.c 
+    crypto/engine/eng_err.c crypto/engine/tb_eckey.c crypto/engine/eng_init.c 
+    crypto/chacha/chacha_enc.c crypto/engine/eng_lib.c crypto/engine/eng_dyn.c 
+    crypto/engine/eng_ctrl.c crypto/engine/eng_list.c crypto/engine/tb_pkmeth.c 
+    crypto/engine/eng_pkey.c crypto/sha/keccak1600.c crypto/engine/tb_rsa.c 
+    crypto/engine/tb_dsa.c crypto/mem_clr.c crypto/bn/bn_asm.c 
+    crypto/engine/tb_dh.c crypto/engine/tb_asnmth.c crypto/engine/eng_table.c 
+    crypto/engine/eng_fat.c crypto/whrlpool/wp_block.c crypto/engine/tb_digest.c crypto/rc4/rc4_skey.c
+)
+
 function(set_clang_unused) 
     if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         #suppresses warnings for incompatible defines and flags (-MT, -MF) when compiling assembly files
@@ -348,17 +361,7 @@ elseif(ANDROID)
         
         set(crypto_SRCS
             ${COMMON_crypto_SRCS}
-            crypto/engine/eng_all.c crypto/rc4/rc4_enc.c crypto/camellia/camellia.c
-            crypto/engine/eng_rdrand.c crypto/engine/tb_cipher.c crypto/camellia/cmll_cbc.c
-            crypto/engine/eng_cnf.c crypto/engine/eng_openssl.c crypto/engine/tb_rand.c
-            crypto/engine/eng_err.c crypto/engine/tb_eckey.c crypto/engine/eng_init.c
-            crypto/chacha/chacha_enc.c crypto/engine/eng_lib.c crypto/engine/eng_dyn.c
-            crypto/engine/eng_ctrl.c crypto/engine/eng_list.c crypto/engine/tb_pkmeth.c
-            crypto/engine/eng_pkey.c crypto/sha/keccak1600.c crypto/engine/tb_rsa.c
-            crypto/engine/tb_dsa.c crypto/mem_clr.c crypto/bn/bn_asm.c
-            crypto/engine/tb_dh.c crypto/engine/tb_asnmth.c crypto/engine/eng_table.c
-            crypto/engine/eng_fat.c crypto/whrlpool/wp_block.c crypto/engine/tb_digest.c
-            crypto/rc4/rc4_skey.c
+            ${crypto_SRC_android_ios}
         )
 
         add_library(crypto STATIC ${crypto_SRCS})
@@ -384,17 +387,7 @@ elseif(ANDROID)
         
         set(crypto_SRCS
             ${COMMON_crypto_SRCS}
-            crypto/engine/eng_ctrl.c crypto/engine/tb_eckey.c crypto/bn/bn_asm.c
-            crypto/engine/tb_pkmeth.c crypto/whrlpool/wp_block.c crypto/engine/eng_cnf.c
-            crypto/engine/eng_rdrand.c crypto/camellia/camellia.c crypto/rc4/rc4_skey.c
-            crypto/engine/eng_table.c crypto/engine/tb_cipher.c crypto/engine/tb_rsa.c
-            crypto/engine/tb_asnmth.c crypto/engine/eng_pkey.c crypto/mem_clr.c
-            crypto/engine/eng_init.c crypto/engine/tb_dsa.c crypto/sha/keccak1600.c
-            crypto/rc4/rc4_enc.c crypto/engine/eng_err.c crypto/engine/tb_rand.c
-            crypto/camellia/cmll_cbc.c crypto/chacha/chacha_enc.c crypto/engine/eng_lib.c
-            crypto/aes/aes_core.c crypto/engine/eng_dyn.c crypto/engine/eng_openssl.c
-            crypto/engine/eng_list.c crypto/engine/eng_all.c crypto/engine/eng_fat.c
-            crypto/engine/tb_dh.c crypto/engine/tb_digest.c
+            ${crypto_SRC_android_ios}
         )
 
         add_library(crypto STATIC ${crypto_SRCS})
@@ -420,17 +413,7 @@ elseif(ANDROID)
         
         set(crypto_SRCS
             ${COMMON_crypto_SRCS}
-            crypto/engine/tb_cipher.c crypto/engine/tb_asnmth.c crypto/engine/tb_pkmeth.c
-            crypto/engine/eng_fat.c crypto/chacha/chacha_enc.c crypto/engine/eng_err.c
-            crypto/engine/eng_list.c crypto/engine/tb_rsa.c crypto/rc4/rc4_enc.c
-            crypto/engine/eng_all.c crypto/engine/eng_table.c crypto/engine/tb_eckey.c
-            crypto/engine/tb_dh.c crypto/engine/eng_rdrand.c crypto/engine/tb_rand.c
-            crypto/engine/eng_dyn.c crypto/whrlpool/wp_block.c crypto/mem_clr.c
-            crypto/sha/keccak1600.c crypto/camellia/cmll_cbc.c crypto/engine/eng_ctrl.c
-            crypto/engine/eng_lib.c crypto/rc4/rc4_skey.c crypto/engine/tb_dsa.c
-            crypto/engine/eng_pkey.c crypto/engine/eng_cnf.c crypto/engine/eng_openssl.c
-            crypto/engine/tb_digest.c crypto/bn/bn_asm.c crypto/camellia/camellia.c
-            crypto/engine/eng_init.c
+            ${crypto_SRC_android_ios}
         )
 
         add_library(crypto STATIC ${crypto_SRCS})
@@ -456,17 +439,7 @@ elseif(ANDROID)
         
         set(crypto_SRCS
             ${COMMON_crypto_SRCS}
-            crypto/engine/tb_asnmth.c crypto/engine/tb_rsa.c crypto/engine/eng_pkey.c
-            crypto/engine/tb_cipher.c crypto/engine/eng_fat.c crypto/chacha/chacha_enc.c
-            crypto/engine/tb_dsa.c crypto/engine/eng_list.c crypto/engine/tb_eckey.c
-            crypto/camellia/camellia.c crypto/rc4/rc4_enc.c crypto/engine/eng_cnf.c
-            crypto/engine/tb_digest.c crypto/engine/eng_ctrl.c crypto/engine/eng_all.c
-            crypto/mem_clr.c crypto/engine/tb_pkmeth.c crypto/engine/eng_err.c
-            crypto/sha/keccak1600.c crypto/engine/eng_rdrand.c crypto/rc4/rc4_skey.c
-            crypto/engine/eng_init.c crypto/whrlpool/wp_block.c crypto/bn/bn_asm.c
-            crypto/engine/eng_lib.c crypto/engine/eng_dyn.c crypto/engine/tb_rand.c
-            crypto/engine/eng_openssl.c crypto/engine/eng_table.c crypto/camellia/cmll_cbc.c
-            crypto/engine/tb_dh.c
+            ${crypto_SRC_android_ios}
         )
 
         add_library(crypto STATIC ${crypto_SRCS})
