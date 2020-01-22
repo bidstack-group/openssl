@@ -173,7 +173,6 @@ function(generate_mkbuildinf ARG ARCH)
     elseif(${CMAKE_BUILD_TYPE} MATCHES Release)
         set(Args "${Args} ${CMAKE_C_FLAGS_RELEASE}")
     endif(${CMAKE_BUILD_TYPE} MATCHES Debug)
-    #message(FATAL_ERROR("Args to configdata.pm: ${Args} ${ARCH}"))
 
     execute_process(COMMAND ${PERL_EXECUTABLE} util/mkbuildinf.pl ${Args} ${ARCH}
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
