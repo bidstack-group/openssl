@@ -3,8 +3,8 @@ project(open_ssl C ASM)
 
 
 #highly unlikely that these directories would exist on any system
-set(OPENSSLDIR "/tēmр/123")
-set(ENGINESDIR "/tēmр/en123")
+set(OPENSSLDIR /tēmр/123)
+set(ENGINESDIR /tēmр/en123)
 
 set(COMMON_ssl_SRCS
     ssl/ssl_rsa.c ssl/statem/statem_srvr.c
@@ -242,7 +242,7 @@ if(CMAKE_OSX_SYSROOT MATCHES iPhoneSimulator)
         
     add_library(ssl STATIC ${COMMON_ssl_SRCS})
     target_include_directories(ssl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} include)
-    target_compile_definitions(ssl PRIVATE  ENGINESDIR=${ENGINESDIR} _REENTRANT OPENSSLDIR=${OPENSSLDIR} OPENSSL_PIC)
+    target_compile_definitions(ssl PRIVATE  ENGINESDIR="${ENGINESDIR}" _REENTRANT OPENSSLDIR="${OPENSSLDIR}" OPENSSL_PIC)
     
     set(crypto_SRCS ${COMMON_crypto_SRCS}
         crypto/camellia/cmll_cbc.c crypto/mem_clr.c crypto/whrlpool/wp_block.c
@@ -252,7 +252,7 @@ if(CMAKE_OSX_SYSROOT MATCHES iPhoneSimulator)
 
     add_library(crypto STATIC ${crypto_SRCS})
     target_include_directories(crypto PRIVATE crypto/modes ${CMAKE_CURRENT_SOURCE_DIR} crypto/ec/curve448/arch_32 crypto/include crypto/ec/curve448 crypto include)
-    target_compile_definitions(crypto PRIVATE  ENGINESDIR=${ENGINESDIR} _REENTRANT OPENSSLDIR=${OPENSSLDIR} OPENSSL_PIC)
+    target_compile_definitions(crypto PRIVATE  ENGINESDIR="${ENGINESDIR}" _REENTRANT OPENSSLDIR="${OPENSSLDIR}" OPENSSL_PIC)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -mios-version-min=7.0.0")
     
 elseif(CMAKE_OSX_SYSROOT MATCHES MacOSX)
@@ -276,7 +276,7 @@ elseif(CMAKE_OSX_SYSROOT MATCHES MacOSX)
     add_library(ssl STATIC ${COMMON_ssl_SRCS})
 
     target_include_directories(ssl PRIVATE include ${CMAKE_CURRENT_SOURCE_DIR})
-    target_compile_definitions(ssl PRIVATE  MD5_ASM POLY1305_ASM X25519_ASM RC4_ASM OPENSSL_CPUID_OBJ OPENSSLDIR=${OPENSSLDIR} ECP_NISTZ256_ASM VPAES_ASM SHA256_ASM OPENSSL_BN_ASM_MONT5 _REENTRANT OPENSSL_IA32_SSE2 SHA1_ASM OPENSSL_PIC SHA512_ASM L_ENDIAN GHASH_ASM ENGINESDIR=${ENGINESDIR} KECCAK1600_ASM OPENSSL_BN_ASM_MONT OPENSSL_BN_ASM_GF2m)
+    target_compile_definitions(ssl PRIVATE  MD5_ASM POLY1305_ASM X25519_ASM RC4_ASM OPENSSL_CPUID_OBJ OPENSSLDIR="${OPENSSLDIR}" ECP_NISTZ256_ASM VPAES_ASM SHA256_ASM OPENSSL_BN_ASM_MONT5 _REENTRANT OPENSSL_IA32_SSE2 SHA1_ASM OPENSSL_PIC SHA512_ASM L_ENDIAN GHASH_ASM ENGINESDIR="${ENGINESDIR}" KECCAK1600_ASM OPENSSL_BN_ASM_MONT OPENSSL_BN_ASM_GF2m)
     
     set(crypto_SRCS
         ${COMMON_crypto_SRCS}
@@ -305,7 +305,7 @@ elseif(CMAKE_OSX_SYSROOT MATCHES MacOSX)
     add_library(crypto STATIC ${crypto_SRCS})
 
     target_include_directories(crypto PRIVATE crypto/modes include ${CMAKE_CURRENT_SOURCE_DIR} crypto/ec/curve448/arch_32 crypto crypto/include crypto/ec/curve448)
-    target_compile_definitions(crypto PRIVATE  MD5_ASM POLY1305_ASM X25519_ASM RC4_ASM OPENSSL_CPUID_OBJ OPENSSLDIR=${OPENSSLDIR} ECP_NISTZ256_ASM VPAES_ASM SHA256_ASM OPENSSL_BN_ASM_MONT5 _REENTRANT OPENSSL_IA32_SSE2 SHA1_ASM OPENSSL_PIC SHA512_ASM L_ENDIAN GHASH_ASM ENGINESDIR=${ENGINESDIR} KECCAK1600_ASM OPENSSL_BN_ASM_MONT OPENSSL_BN_ASM_GF2m)
+    target_compile_definitions(crypto PRIVATE  MD5_ASM POLY1305_ASM X25519_ASM RC4_ASM OPENSSL_CPUID_OBJ OPENSSLDIR="${OPENSSLDIR}" ECP_NISTZ256_ASM VPAES_ASM SHA256_ASM OPENSSL_BN_ASM_MONT5 _REENTRANT OPENSSL_IA32_SSE2 SHA1_ASM OPENSSL_PIC SHA512_ASM L_ENDIAN GHASH_ASM ENGINESDIR="${ENGINESDIR}" KECCAK1600_ASM OPENSSL_BN_ASM_MONT OPENSSL_BN_ASM_GF2m)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-common -fPIC ")
     set_clang_unused()
 
@@ -326,7 +326,7 @@ elseif(CMAKE_OSX_SYSROOT MATCHES iPhoneOS)
     add_library(ssl STATIC ${COMMON_ssl_SRCS})
 
     target_include_directories(ssl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} include)
-    target_compile_definitions(ssl PRIVATE  _REENTRANT OPENSSLDIR=${OPENSSLDIR} ENGINESDIR=${ENGINESDIR} OPENSSL_PIC)
+    target_compile_definitions(ssl PRIVATE  _REENTRANT OPENSSLDIR="${OPENSSLDIR}" ENGINESDIR="${ENGINESDIR}" OPENSSL_PIC)
     
     set(crypto_SRCS
         ${COMMON_crypto_SRCS}
@@ -340,7 +340,7 @@ elseif(CMAKE_OSX_SYSROOT MATCHES iPhoneOS)
     add_library(crypto STATIC ${crypto_SRCS})
 
     target_include_directories(crypto PRIVATE crypto/ec/curve448/arch_32 crypto/include include ${CMAKE_CURRENT_SOURCE_DIR} crypto/modes crypto/ec/curve448 crypto)
-    target_compile_definitions(crypto PRIVATE  _REENTRANT OPENSSLDIR=${OPENSSLDIR} ENGINESDIR=${ENGINESDIR} OPENSSL_PIC)
+    target_compile_definitions(crypto PRIVATE  _REENTRANT OPENSSLDIR="${OPENSSLDIR}" ENGINESDIR="${ENGINESDIR}" OPENSSL_PIC)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mios-version-min=7.0.0 -fno-common -fPIC ")
         
 elseif(ANDROID)
@@ -356,7 +356,7 @@ elseif(ANDROID)
         add_library(ssl STATIC ${COMMON_ssl_SRCS})
 
         target_include_directories(ssl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} include)
-        target_compile_definitions(ssl PRIVATE OPENSSL_USE_NODELETE OPENSSL_PIC ENGINESDIR=${ENGINESDIR} OPENSSLDIR=${OPENSSLDIR})
+        target_compile_definitions(ssl PRIVATE OPENSSL_USE_NODELETE OPENSSL_PIC ENGINESDIR="${ENGINESDIR}" OPENSSLDIR="${OPENSSLDIR}")
         
         set(crypto_SRCS
             ${COMMON_crypto_SRCS}
@@ -366,7 +366,7 @@ elseif(ANDROID)
         add_library(crypto STATIC ${crypto_SRCS})
 
         target_include_directories(crypto PRIVATE crypto/modes crypto crypto/ec/curve448 crypto/include ${CMAKE_CURRENT_SOURCE_DIR} include crypto/ec/curve448/arch_32)
-        target_compile_definitions(crypto PRIVATE OPENSSL_USE_NODELETE OPENSSL_PIC ENGINESDIR=${ENGINESDIR} OPENSSLDIR=${OPENSSLDIR})
+        target_compile_definitions(crypto PRIVATE OPENSSL_USE_NODELETE OPENSSL_PIC ENGINESDIR="${ENGINESDIR}" OPENSSLDIR="${OPENSSLDIR}")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -pthread ")
 
     elseif(${ANDROID_ABI} STREQUAL "x86")
@@ -381,7 +381,7 @@ elseif(ANDROID)
         add_library(ssl STATIC ${COMMON_ssl_SRCS})
 
         target_include_directories(ssl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} include)
-        target_compile_definitions(ssl PRIVATE  ENGINESDIR=${ENGINESDIR} OPENSSL_PIC OPENSSLDIR=${OPENSSLDIR} OPENSSL_USE_NODELETE)
+        target_compile_definitions(ssl PRIVATE  ENGINESDIR="${ENGINESDIR}" OPENSSL_PIC OPENSSLDIR="${OPENSSLDIR}" OPENSSL_USE_NODELETE)
         
         set(crypto_SRCS
             ${COMMON_crypto_SRCS}
@@ -391,7 +391,7 @@ elseif(ANDROID)
         add_library(crypto STATIC ${crypto_SRCS})
 
         target_include_directories(crypto PRIVATE crypto/ec/curve448/arch_32 crypto/modes ${CMAKE_CURRENT_SOURCE_DIR} include crypto/ec/curve448 crypto crypto/include)
-        target_compile_definitions(crypto PRIVATE  ENGINESDIR=${ENGINESDIR} OPENSSL_PIC OPENSSLDIR=${OPENSSLDIR} OPENSSL_USE_NODELETE)
+        target_compile_definitions(crypto PRIVATE  ENGINESDIR="${ENGINESDIR}" OPENSSL_PIC OPENSSLDIR="${OPENSSLDIR}" OPENSSL_USE_NODELETE)
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fomit-frame-pointer -pthread  -fPIC")
         
     elseif(${ANDROID_ABI} STREQUAL "armeabi-v7a")
@@ -406,7 +406,7 @@ elseif(ANDROID)
         add_library(ssl STATIC ${COMMON_ssl_SRCS})
 
         target_include_directories(ssl PRIVATE include ${CMAKE_CURRENT_SOURCE_DIR})
-        target_compile_definitions(ssl PRIVATE OPENSSL_PIC OPENSSLDIR=${OPENSSLDIR} OPENSSL_USE_NODELETE ENGINESDIR=${ENGINESDIR})
+        target_compile_definitions(ssl PRIVATE OPENSSL_PIC OPENSSLDIR="${OPENSSLDIR}" OPENSSL_USE_NODELETE ENGINESDIR="${ENGINESDIR}")
         
         set(crypto_SRCS
             ${COMMON_crypto_SRCS}
@@ -416,7 +416,7 @@ elseif(ANDROID)
         add_library(crypto STATIC ${crypto_SRCS})
 
         target_include_directories(crypto PRIVATE crypto/include crypto crypto/modes ${CMAKE_CURRENT_SOURCE_DIR} crypto/ec/curve448/arch_32 crypto/ec/curve448 include)
-        target_compile_definitions(crypto PRIVATE OPENSSL_PIC OPENSSLDIR=${OPENSSLDIR} OPENSSL_USE_NODELETE ENGINESDIR=${ENGINESDIR})
+        target_compile_definitions(crypto PRIVATE OPENSSL_PIC OPENSSLDIR="${OPENSSLDIR}" OPENSSL_USE_NODELETE ENGINESDIR="${ENGINESDIR}")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -pthread -fPIC")
 
     elseif(${ANDROID_ABI} STREQUAL "arm64-v8a")
@@ -431,7 +431,7 @@ elseif(ANDROID)
         add_library(ssl STATIC ${COMMON_ssl_SRCS})
 
         target_include_directories(ssl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} include)
-        target_compile_definitions(ssl PRIVATE  OPENSSL_PIC ENGINESDIR=${ENGINESDIR} OPENSSL_USE_NODELETE OPENSSLDIR=${OPENSSLDIR})
+        target_compile_definitions(ssl PRIVATE  OPENSSL_PIC ENGINESDIR="${ENGINESDIR}" OPENSSL_USE_NODELETE OPENSSLDIR="${OPENSSLDIR}")
         
         set(crypto_SRCS
             ${COMMON_crypto_SRCS}
@@ -441,7 +441,7 @@ elseif(ANDROID)
         add_library(crypto STATIC ${crypto_SRCS})
 
         target_include_directories(crypto PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} crypto/ec/curve448/arch_32 crypto/include crypto/modes crypto crypto/ec/curve448 include)
-        target_compile_definitions(crypto PRIVATE  OPENSSL_PIC ENGINESDIR=${ENGINESDIR} OPENSSL_USE_NODELETE OPENSSLDIR=${OPENSSLDIR})
+        target_compile_definitions(crypto PRIVATE  OPENSSL_PIC ENGINESDIR="${ENGINESDIR}" OPENSSL_USE_NODELETE OPENSSLDIR="${OPENSSLDIR}")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC  -pthread")
 
     endif() #arm64
@@ -470,7 +470,7 @@ elseif(UNIX)
     add_library(ssl STATIC ${COMMON_ssl_SRCS})
 
     target_include_directories(ssl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} include)
-    target_compile_definitions(ssl PRIVATE  ECP_NISTZ256_ASM SHA1_ASM POLY1305_ASM GHASH_ASM ENGINESDIR=${ENGINESDIR} OPENSSL_BN_ASM_MONT5 VPAES_ASM KECCAK1600_ASM L_ENDIAN X25519_ASM OPENSSLDIR=${OPENSSLDIR} RC4_ASM MD5_ASM SHA256_ASM OPENSSL_IA32_SSE2 OPENSSL_PIC OPENSSL_BN_ASM_MONT OPENSSL_BN_ASM_GF2m SHA512_ASM OPENSSL_CPUID_OBJ OPENSSL_USE_NODELETE)
+    target_compile_definitions(ssl PRIVATE  ECP_NISTZ256_ASM SHA1_ASM POLY1305_ASM GHASH_ASM ENGINESDIR="${ENGINESDIR}" OPENSSL_BN_ASM_MONT5 VPAES_ASM KECCAK1600_ASM L_ENDIAN X25519_ASM OPENSSLDIR="${OPENSSLDIR}" RC4_ASM MD5_ASM SHA256_ASM OPENSSL_IA32_SSE2 OPENSSL_PIC OPENSSL_BN_ASM_MONT OPENSSL_BN_ASM_GF2m SHA512_ASM OPENSSL_CPUID_OBJ OPENSSL_USE_NODELETE)
     
     set(crypto_SRCS
         ${COMMON_crypto_SRCS}
@@ -499,7 +499,7 @@ elseif(UNIX)
     add_library(crypto STATIC ${crypto_SRCS})
 
     target_include_directories(crypto PRIVATE crypto/include include ${CMAKE_CURRENT_SOURCE_DIR} crypto crypto/ec/curve448 crypto/modes crypto/ec/curve448/arch_32)
-    target_compile_definitions(crypto PRIVATE  ECP_NISTZ256_ASM SHA1_ASM POLY1305_ASM GHASH_ASM ENGINESDIR=${ENGINESDIR} OPENSSL_BN_ASM_MONT5 VPAES_ASM KECCAK1600_ASM L_ENDIAN X25519_ASM OPENSSLDIR=${OPENSSLDIR} RC4_ASM MD5_ASM SHA256_ASM OPENSSL_IA32_SSE2 OPENSSL_PIC OPENSSL_BN_ASM_MONT OPENSSL_BN_ASM_GF2m SHA512_ASM OPENSSL_CPUID_OBJ OPENSSL_USE_NODELETE)
+    target_compile_definitions(crypto PRIVATE  ECP_NISTZ256_ASM SHA1_ASM POLY1305_ASM GHASH_ASM ENGINESDIR="${ENGINESDIR}" OPENSSL_BN_ASM_MONT5 VPAES_ASM KECCAK1600_ASM L_ENDIAN X25519_ASM OPENSSLDIR="${OPENSSLDIR}" RC4_ASM MD5_ASM SHA256_ASM OPENSSL_IA32_SSE2 OPENSSL_PIC OPENSSL_BN_ASM_MONT OPENSSL_BN_ASM_GF2m SHA512_ASM OPENSSL_CPUID_OBJ OPENSSL_USE_NODELETE)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -m64 -Wa,--noexecstack -fPIC")
     set_clang_unused()
 endif()
