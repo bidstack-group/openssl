@@ -449,6 +449,75 @@ elseif(WIN32)
 
     message(FATAL_ERROR("Windows is not currently supported"))
 
+elseif(CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
+    set(arch "BSD-x86_64")
+    message("Building ${arch}")
+    
+        find_program(PERL_EXECUTABLE perl)
+        if(NOT PERL_EXECUTABLE)
+            message(FATAL_ERROR("Perl not found"))
+        endif(NOT PERL_EXECUTABLE)
+
+        message("Configuring configdata.pm for \"${arch}\"")
+        
+        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} Configure ${arch} 
+                WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+                OUTPUT_VARIABLE TEMP
+                ERROR_VARIABLE ERROR
+        )
+        if(ERROR)
+            MESSAGE(FATAL_ERROR("Error while configuring: ${ERROR}"))
+        endif(ERROR)
+
+        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} util/mkbuildinf.pl "cc -fPIC -pthread -Wall -O3 -DL_ENDIAN -DOPENSSL_PIC -D_THREAD_SAFE -D_REENTRANT -DNDEBUG" "BSD-x86_64" 
+            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+            OUTPUT_FILE crypto/buildinf.h
+            ERROR_VARIABLE ERROR)
+        if(ERROR)
+            MESSAGE(FATAL_ERROR("Error while generating mkbuildinf: ${ERROR}"))
+        endif(ERROR)
+
+        foreach(el crypto/include/internal/bn_conf.h;crypto/include/internal/dso_conf.h;include/openssl/opensslconf.h)
+            MESSAGE("Generating ${el}")
+            EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE}
+                "-I${CMAKE_CURRENT_LIST_DIR}" -Mconfigdata "util/dofile.pl" "-oMakefile" ${el}.in
+                WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+                OUTPUT_FILE ${el}
+                ERROR_VARIABLE error)
+            if(error)
+                message(FATAL_ERROR("Error while generating: ${error}"))
+            endif(error)
+        endforeach()
+        
+    SET(ssl_SRCS ${COMMON_ssl_SRCS})
+
+    add_library(ssl STATIC ${ssl_SRCS})
+
+    TARGET_INCLUDE_DIRECTORIES(ssl PRIVATE include ${CMAKE_CURRENT_SOURCE_DIR})
+    TARGET_COMPILE_DEFINITIONS(ssl PRIVATE  OPENSSL_PIC OPENSSLDIR="/usr/local/ssl" ENGINESDIR="/usr/local/lib/engines-1.1" NDEBUG L_ENDIAN _THREAD_SAFE _REENTRANT)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -fPIC -pthread")
+    
+    SET(crypto_SRCS
+        ${COMMON_crypto_SRCS}
+        crypto/mem_clr.c crypto/camellia/cmll_cbc.c crypto/engine/eng_devcrypto.c
+        crypto/engine/tb_rsa.c crypto/engine/eng_list.c crypto/engine/eng_table.c
+        crypto/whrlpool/wp_block.c crypto/engine/tb_pkmeth.c crypto/engine/eng_all.c
+        crypto/engine/eng_openssl.c crypto/engine/eng_lib.c crypto/rc4/rc4_enc.c
+        crypto/camellia/camellia.c crypto/engine/eng_cnf.c crypto/bn/bn_asm.c
+        crypto/engine/eng_err.c crypto/engine/tb_asnmth.c crypto/engine/tb_dsa.c
+        crypto/engine/tb_cipher.c crypto/sha/keccak1600.c crypto/engine/tb_dh.c
+        crypto/engine/eng_pkey.c crypto/engine/eng_rdrand.c crypto/engine/tb_eckey.c
+        crypto/engine/eng_fat.c crypto/engine/tb_rand.c crypto/engine/eng_init.c
+        crypto/engine/eng_dyn.c crypto/rc4/rc4_skey.c crypto/chacha/chacha_enc.c
+        crypto/engine/tb_digest.c crypto/engine/eng_ctrl.c
+    )
+
+    add_library(crypto STATIC ${crypto_SRCS})
+
+    TARGET_INCLUDE_DIRECTORIES(crypto PRIVATE crypto/ec/curve448 crypto/include crypto/ec/curve448/arch_32 ${CMAKE_CURRENT_SOURCE_DIR} crypto/modes include crypto)
+    TARGET_COMPILE_DEFINITIONS(crypto PRIVATE  OPENSSL_PIC OPENSSLDIR="/usr/local/ssl" ENGINESDIR="/usr/local/lib/engines-1.1" NDEBUG L_ENDIAN _THREAD_SAFE _REENTRANT)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -fPIC -pthread")
+
 elseif(UNIX)
 
     set(arch "linux-x86_64-clang")
