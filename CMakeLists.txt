@@ -460,7 +460,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
 
         message("Configuring configdata.pm for \"${arch}\"")
         
-        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} Configure ${arch} 
+        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} Configure ${arch} no-asm
                 WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
                 OUTPUT_VARIABLE TEMP
                 ERROR_VARIABLE ERROR
