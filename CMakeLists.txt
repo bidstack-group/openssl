@@ -453,49 +453,19 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
     set(arch "BSD-x86_64")
     message("Building ${arch}")
     
-        find_program(PERL_EXECUTABLE perl)
-        if(NOT PERL_EXECUTABLE)
-            message(FATAL_ERROR("Perl not found"))
-        endif(NOT PERL_EXECUTABLE)
+    find_program(PERL_EXECUTABLE perl)
+    if(NOT PERL_EXECUTABLE)
+        message(FATAL_ERROR("Perl not found"))
+    endif(NOT PERL_EXECUTABLE)
 
-        message("Configuring configdata.pm for \"${arch}\"")
+    generate_configdata(${arch} no-asm)
+    generate_mkbuildinf("clang -pthread -m64 -Wa,--noexecstack -DOPENSSL_USE_NODELETE -DL_ENDIAN -DOPENSSL_PIC -DOPENSSL_CPUID_OBJ -DOPENSSL_IA32_SSE2 -DOPENSSL_BN_ASM_MONT -DOPENSSL_BN_ASM_MONT5 -DOPENSSL_BN_ASM_GF2m -DSHA1_ASM -DSHA256_ASM -DSHA512_ASM -DKECCAK1600_ASM -DRC4_ASM -DMD5_ASM -DVPAES_ASM -DGHASH_ASM -DECP_NISTZ256_ASM -DX25519_ASM -DPOLY1305_ASM" "BSD-x86_64")
+    generate_headers(${arch})
         
-        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} Configure ${arch} no-asm
-                WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-                OUTPUT_VARIABLE TEMP
-                ERROR_VARIABLE ERROR
-        )
-        if(ERROR)
-            MESSAGE(FATAL_ERROR("Error while configuring: ${ERROR}"))
-        endif(ERROR)
-
-        EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} util/mkbuildinf.pl "cc -fPIC -pthread -Wall -O3 -DL_ENDIAN -DOPENSSL_PIC -D_THREAD_SAFE -D_REENTRANT -DNDEBUG" "BSD-x86_64" 
-            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-            OUTPUT_FILE crypto/buildinf.h
-            ERROR_VARIABLE ERROR)
-        if(ERROR)
-            MESSAGE(FATAL_ERROR("Error while generating mkbuildinf: ${ERROR}"))
-        endif(ERROR)
-
-        foreach(el crypto/include/internal/bn_conf.h;crypto/include/internal/dso_conf.h;include/openssl/opensslconf.h)
-            MESSAGE("Generating ${el}")
-            EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE}
-                "-I${CMAKE_CURRENT_LIST_DIR}" -Mconfigdata "util/dofile.pl" "-oMakefile" ${el}.in
-                WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-                OUTPUT_FILE ${el}
-                ERROR_VARIABLE error)
-            if(error)
-                message(FATAL_ERROR("Error while generating: ${error}"))
-            endif(error)
-        endforeach()
-        
-    SET(ssl_SRCS ${COMMON_ssl_SRCS})
-
-    add_library(ssl STATIC ${ssl_SRCS})
+    add_library(ssl STATIC ${COMMON_ssl_SRCS})
 
     TARGET_INCLUDE_DIRECTORIES(ssl PRIVATE include ${CMAKE_CURRENT_SOURCE_DIR})
     TARGET_COMPILE_DEFINITIONS(ssl PRIVATE  OPENSSL_PIC OPENSSLDIR="/usr/local/ssl" ENGINESDIR="/usr/local/lib/engines-1.1" NDEBUG L_ENDIAN _THREAD_SAFE _REENTRANT)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -fPIC -pthread")
     
     SET(crypto_SRCS
         ${COMMON_crypto_SRCS}
@@ -516,7 +486,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
 
     TARGET_INCLUDE_DIRECTORIES(crypto PRIVATE crypto/ec/curve448 crypto/include crypto/ec/curve448/arch_32 ${CMAKE_CURRENT_SOURCE_DIR} crypto/modes include crypto)
     TARGET_COMPILE_DEFINITIONS(crypto PRIVATE  OPENSSL_PIC OPENSSLDIR="/usr/local/ssl" ENGINESDIR="/usr/local/lib/engines-1.1" NDEBUG L_ENDIAN _THREAD_SAFE _REENTRANT)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -fPIC -pthread")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -fPIC -pthread")
 
 elseif(UNIX)
 
