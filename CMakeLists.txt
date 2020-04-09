@@ -266,7 +266,7 @@ elseif(CMAKE_OSX_SYSROOT MATCHES MacOSX)
     endif(NOT PERL_EXECUTABLE)
 
     generate_configdata(${arch})
-    generate_mkbuildinf("clang -arch x86_64 -DL_ENDIAN -DOPENSSL_PIC -DOPENSSL_CPUID_OBJ -DOPENSSL_IA32_SSE2 -DOPENSSL_BN_ASM_MONT -DOPENSSL_BN_ASM_MONT5 -DOPENSSL_BN_ASM_GF2m -DSHA1_ASM -DSHA256_ASM -DSHA512_ASM -DKECCAK1600_ASM -DRC4_ASM -DMD5_ASM -DVPAES_ASM -DGHASH_ASM -DECP_NISTZ256_ASM -DX25519_ASM -DPOLY1305_ASM -D_REENTRANT" "darwin64-x86_64-cc")
+    generate_mkbuildinf("clang -arch x86_64 -DL_ENDIAN -DOPENSSL_PIC  -D_REENTRANT" "darwin64-x86_64-cc")
     generate_headers(${arch})
 
     set(PLs crypto/aes/asm/aesni-mb-x86_64.pl crypto/aes/asm/aesni-sha1-x86_64.pl crypto/aes/asm/aesni-sha256-x86_64.pl crypto/aes/asm/aesni-x86_64.pl crypto/aes/asm/vpaes-x86_64.pl crypto/bn/asm/rsaz-avx2.pl crypto/bn/asm/rsaz-x86_64.pl crypto/bn/asm/x86_64-gf2m.pl crypto/bn/asm/x86_64-mont.pl crypto/bn/asm/x86_64-mont5.pl crypto/camellia/asm/cmll-x86_64.pl crypto/chacha/asm/chacha-x86_64.pl crypto/ec/asm/ecp_nistz256-x86_64.pl crypto/ec/asm/x25519-x86_64.pl crypto/md5/asm/md5-x86_64.pl crypto/modes/asm/aesni-gcm-x86_64.pl crypto/modes/asm/ghash-x86_64.pl crypto/poly1305/asm/poly1305-x86_64.pl crypto/rc4/asm/rc4-md5-x86_64.pl crypto/rc4/asm/rc4-x86_64.pl crypto/sha/asm/keccak1600-x86_64.pl crypto/sha/asm/sha1-mb-x86_64.pl crypto/sha/asm/sha1-x86_64.pl crypto/sha/asm/sha256-mb-x86_64.pl crypto/sha/asm/sha512-x86_64.pl crypto/sha/asm/sha512-x86_64.pl crypto/whrlpool/asm/wp-x86_64.pl crypto/x86_64cpuid.pl engines/asm/e_padlock-x86_64.pl)
@@ -276,36 +276,24 @@ elseif(CMAKE_OSX_SYSROOT MATCHES MacOSX)
     add_library(ssl STATIC ${COMMON_ssl_SRCS})
 
     target_include_directories(ssl PRIVATE include ${CMAKE_CURRENT_SOURCE_DIR})
-    target_compile_definitions(ssl PRIVATE  MD5_ASM POLY1305_ASM X25519_ASM RC4_ASM OPENSSL_CPUID_OBJ OPENSSLDIR="${OPENSSLDIR}" ECP_NISTZ256_ASM VPAES_ASM SHA256_ASM OPENSSL_BN_ASM_MONT5 _REENTRANT OPENSSL_IA32_SSE2 SHA1_ASM OPENSSL_PIC SHA512_ASM L_ENDIAN GHASH_ASM ENGINESDIR="${ENGINESDIR}" KECCAK1600_ASM OPENSSL_BN_ASM_MONT OPENSSL_BN_ASM_GF2m)
+    target_compile_definitions(ssl PRIVATE  OPENSSLDIR="${OPENSSLDIR}"  _REENTRANT OPENSSL_PIC L_ENDIAN ENGINESDIR="${ENGINESDIR}")
     
     set(crypto_SRCS
         ${COMMON_crypto_SRCS}
-        crypto/engine/eng_err.c crypto/x86_64cpuid.s crypto/whrlpool/wp-x86_64.s
-        crypto/modes/aesni-gcm-x86_64.s crypto/aes/aesni-x86_64.s crypto/camellia/cmll-x86_64.s
-        crypto/ec/x25519-x86_64.s crypto/bn/asm/x86_64-gcc.c crypto/engine/eng_init.c
-        crypto/engine/eng_fat.c crypto/bn/rsaz_exp.c crypto/ec/ecp_nistz256.c
-        crypto/sha/sha256-x86_64.s crypto/sha/sha1-mb-x86_64.s crypto/engine/tb_asnmth.c
-        crypto/ec/ecp_nistz256-x86_64.s crypto/engine/eng_ctrl.c crypto/engine/tb_eckey.c
-        crypto/engine/eng_table.c crypto/engine/eng_rdrand.c crypto/bn/x86_64-mont.s
-        crypto/engine/eng_cnf.c crypto/bf/bf_enc.c crypto/sha/sha256-mb-x86_64.s
-        crypto/aes/aesni-sha1-x86_64.s crypto/engine/tb_rand.c crypto/engine/eng_dyn.c
-        crypto/chacha/chacha-x86_64.s crypto/engine/eng_list.c crypto/sha/sha1-x86_64.s
-        crypto/engine/eng_lib.c crypto/engine/tb_cipher.c crypto/aes/aesni-mb-x86_64.s
-        crypto/des/fcrypt_b.c crypto/engine/tb_pkmeth.c crypto/rc4/rc4-md5-x86_64.s
-        crypto/rc4/rc4-x86_64.s crypto/des/des_enc.c crypto/modes/ghash-x86_64.s
-        crypto/sha/keccak1600-x86_64.s crypto/md5/md5-x86_64.s crypto/bn/x86_64-mont5.s
-        crypto/bn/rsaz-avx2.s crypto/engine/eng_all.c crypto/camellia/cmll_misc.c
-        crypto/bn/rsaz-x86_64.s crypto/aes/aes_core.c crypto/engine/tb_digest.c
-        crypto/aes/aesni-sha256-x86_64.s crypto/engine/tb_dsa.c crypto/bn/x86_64-gf2m.s
-        crypto/poly1305/poly1305-x86_64.s crypto/aes/vpaes-x86_64.s crypto/engine/tb_dh.c
-        crypto/engine/eng_pkey.c crypto/engine/eng_openssl.c crypto/sha/sha512-x86_64.s
-        crypto/engine/tb_rsa.c
+        crypto/engine/eng_openssl.c crypto/engine/tb_pkmeth.c crypto/engine/eng_all.c
+        crypto/engine/tb_rsa.c crypto/engine/eng_err.c crypto/engine/tb_digest.c
+        crypto/engine/eng_lib.c crypto/engine/tb_dsa.c crypto/engine/eng_cnf.c
+        crypto/engine/eng_dyn.c crypto/engine/eng_init.c crypto/engine/eng_table.c
+        crypto/engine/tb_cipher.c crypto/engine/tb_dh.c crypto/engine/eng_list.c
+        crypto/engine/eng_ctrl.c crypto/engine/eng_rdrand.c crypto/engine/eng_pkey.c
+        crypto/engine/tb_asnmth.c crypto/engine/tb_eckey.c crypto/engine/eng_fat.c
+        crypto/engine/tb_rand.c
     )
 
     add_library(crypto STATIC ${crypto_SRCS})
 
     target_include_directories(crypto PRIVATE crypto/modes include ${CMAKE_CURRENT_SOURCE_DIR} crypto/ec/curve448/arch_32 crypto crypto/include crypto/ec/curve448)
-    target_compile_definitions(crypto PRIVATE  MD5_ASM POLY1305_ASM X25519_ASM RC4_ASM OPENSSL_CPUID_OBJ OPENSSLDIR="${OPENSSLDIR}" ECP_NISTZ256_ASM VPAES_ASM SHA256_ASM OPENSSL_BN_ASM_MONT5 _REENTRANT OPENSSL_IA32_SSE2 SHA1_ASM OPENSSL_PIC SHA512_ASM L_ENDIAN GHASH_ASM ENGINESDIR="${ENGINESDIR}" KECCAK1600_ASM OPENSSL_BN_ASM_MONT OPENSSL_BN_ASM_GF2m)
+    target_compile_definitions(crypto PRIVATE  OPENSSLDIR="${OPENSSLDIR}" ENGINESDIR="${ENGINESDIR}" _REENTRANT OPENSSL_PIC L_ENDIAN)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-common -fPIC ")
     set_clang_unused()
 
@@ -459,47 +447,34 @@ elseif(UNIX)
         message(FATAL_ERROR("Perl not found"))
     endif(NOT PERL_EXECUTABLE)
 
-    generate_configdata(${arch})
-    generate_mkbuildinf("clang -pthread -m64 -Wa,--noexecstack -DOPENSSL_USE_NODELETE -DL_ENDIAN -DOPENSSL_PIC -DOPENSSL_CPUID_OBJ -DOPENSSL_IA32_SSE2 -DOPENSSL_BN_ASM_MONT -DOPENSSL_BN_ASM_MONT5 -DOPENSSL_BN_ASM_GF2m -DSHA1_ASM -DSHA256_ASM -DSHA512_ASM -DKECCAK1600_ASM -DRC4_ASM -DMD5_ASM -DVPAES_ASM -DGHASH_ASM -DECP_NISTZ256_ASM -DX25519_ASM -DPOLY1305_ASM" "linux-x86_64-clang")
+    generate_configdata(${arch} no-asm)
+    generate_mkbuildinf("clang -pthread -m64 -Wa,--noexecstack -DOPENSSL_USE_NODELETE -DL_ENDIAN -DOPENSSL_PIC" "linux-x86_64-clang")
     generate_headers(${arch})
     
-    set(PLs crypto/aes/asm/aesni-mb-x86_64.pl crypto/aes/asm/aesni-sha1-x86_64.pl crypto/aes/asm/aesni-sha256-x86_64.pl crypto/aes/asm/aesni-x86_64.pl crypto/aes/asm/vpaes-x86_64.pl crypto/bn/asm/rsaz-avx2.pl crypto/bn/asm/rsaz-x86_64.pl crypto/bn/asm/x86_64-gf2m.pl crypto/bn/asm/x86_64-mont.pl crypto/bn/asm/x86_64-mont5.pl crypto/camellia/asm/cmll-x86_64.pl crypto/chacha/asm/chacha-x86_64.pl crypto/ec/asm/ecp_nistz256-x86_64.pl crypto/ec/asm/x25519-x86_64.pl crypto/md5/asm/md5-x86_64.pl crypto/modes/asm/aesni-gcm-x86_64.pl crypto/modes/asm/ghash-x86_64.pl crypto/poly1305/asm/poly1305-x86_64.pl crypto/rc4/asm/rc4-md5-x86_64.pl crypto/rc4/asm/rc4-x86_64.pl crypto/sha/asm/keccak1600-x86_64.pl crypto/sha/asm/sha1-mb-x86_64.pl crypto/sha/asm/sha1-x86_64.pl crypto/sha/asm/sha256-mb-x86_64.pl crypto/sha/asm/sha512-x86_64.pl crypto/sha/asm/sha512-x86_64.pl crypto/whrlpool/asm/wp-x86_64.pl crypto/x86_64cpuid.pl engines/asm/e_padlock-x86_64.pl)
-    set(ASMs crypto/aes/aesni-mb-x86_64.s crypto/aes/aesni-sha1-x86_64.s crypto/aes/aesni-sha256-x86_64.s crypto/aes/aesni-x86_64.s crypto/aes/vpaes-x86_64.s crypto/bn/rsaz-avx2.s crypto/bn/rsaz-x86_64.s crypto/bn/x86_64-gf2m.s crypto/bn/x86_64-mont.s crypto/bn/x86_64-mont5.s crypto/camellia/cmll-x86_64.s crypto/chacha/chacha-x86_64.s crypto/ec/ecp_nistz256-x86_64.s crypto/ec/x25519-x86_64.s crypto/md5/md5-x86_64.s crypto/modes/aesni-gcm-x86_64.s crypto/modes/ghash-x86_64.s crypto/poly1305/poly1305-x86_64.s crypto/rc4/rc4-md5-x86_64.s crypto/rc4/rc4-x86_64.s crypto/sha/keccak1600-x86_64.s crypto/sha/sha1-mb-x86_64.s crypto/sha/sha1-x86_64.s crypto/sha/sha256-mb-x86_64.s crypto/sha/sha256-x86_64.s crypto/sha/sha512-x86_64.s crypto/whrlpool/wp-x86_64.s crypto/x86_64cpuid.s engines/e_padlock-x86_64.s)
-    pls_to_asms("${PLs}" "${ASMs}" elf ${arch})
-        
     add_library(ssl STATIC ${COMMON_ssl_SRCS})
 
     target_include_directories(ssl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} include)
-    target_compile_definitions(ssl PRIVATE  ECP_NISTZ256_ASM SHA1_ASM POLY1305_ASM GHASH_ASM ENGINESDIR="${ENGINESDIR}" OPENSSL_BN_ASM_MONT5 VPAES_ASM KECCAK1600_ASM L_ENDIAN X25519_ASM OPENSSLDIR="${OPENSSLDIR}" RC4_ASM MD5_ASM SHA256_ASM OPENSSL_IA32_SSE2 OPENSSL_PIC OPENSSL_BN_ASM_MONT OPENSSL_BN_ASM_GF2m SHA512_ASM OPENSSL_CPUID_OBJ OPENSSL_USE_NODELETE)
+    target_compile_definitions(ssl PRIVATE  ENGINESDIR="${ENGINESDIR}" OPENSSLDIR="${OPENSSLDIR}" L_ENDIAN OPENSSL_PIC OPENSSL_USE_NODELETE)
     
     set(crypto_SRCS
         ${COMMON_crypto_SRCS}
-        crypto/engine/tb_pkmeth.c crypto/sha/sha512-x86_64.s crypto/engine/eng_table.c
-        crypto/ec/ecp_nistz256.c crypto/bn/x86_64-mont.s crypto/engine/tb_dh.c
-        crypto/rc4/rc4-x86_64.s crypto/engine/eng_ctrl.c crypto/camellia/cmll_misc.c
-        crypto/sha/sha256-x86_64.s crypto/md5/md5-x86_64.s crypto/modes/ghash-x86_64.s
-        crypto/engine/eng_lib.c crypto/engine/tb_rand.c crypto/x86_64cpuid.s
-        crypto/bn/x86_64-mont5.s crypto/engine/tb_eckey.c crypto/engine/tb_digest.c
-        crypto/sha/sha1-x86_64.s crypto/engine/tb_asnmth.c crypto/poly1305/poly1305-x86_64.s
-        crypto/ec/ecp_nistz256-x86_64.s crypto/modes/aesni-gcm-x86_64.s crypto/engine/eng_fat.c
-        crypto/sha/sha1-mb-x86_64.s crypto/bn/rsaz-x86_64.s crypto/rc4/rc4-md5-x86_64.s
-        crypto/aes/aesni-sha1-x86_64.s crypto/aes/aes_core.c crypto/engine/tb_dsa.c
-        crypto/engine/eng_all.c crypto/bn/rsaz_exp.c crypto/whrlpool/wp-x86_64.s
-        crypto/engine/eng_rdrand.c crypto/bn/x86_64-gf2m.s crypto/camellia/cmll-x86_64.s
-        crypto/engine/eng_list.c crypto/bf/bf_enc.c crypto/bn/rsaz-avx2.s
-        crypto/engine/eng_cnf.c crypto/engine/tb_rsa.c crypto/des/fcrypt_b.c
-        crypto/aes/aesni-mb-x86_64.s crypto/aes/vpaes-x86_64.s crypto/aes/aesni-sha256-x86_64.s
-        crypto/des/des_enc.c crypto/sha/sha256-mb-x86_64.s crypto/ec/x25519-x86_64.s
-        crypto/engine/eng_err.c crypto/engine/eng_init.c crypto/engine/eng_dyn.c
-        crypto/engine/eng_pkey.c crypto/engine/tb_cipher.c crypto/aes/aesni-x86_64.s
-        crypto/bn/asm/x86_64-gcc.c crypto/sha/keccak1600-x86_64.s crypto/chacha/chacha-x86_64.s
-        crypto/engine/eng_openssl.c
+        crypto/engine/eng_list.c crypto/whrlpool/wp_block.c crypto/engine/eng_cnf.c
+        crypto/engine/eng_pkey.c crypto/camellia/cmll_cbc.c crypto/bn/bn_asm.c
+        crypto/engine/eng_all.c crypto/mem_clr.c crypto/engine/eng_fat.c
+        crypto/engine/eng_rdrand.c crypto/engine/eng_err.c crypto/engine/tb_eckey.c
+        crypto/engine/eng_dyn.c crypto/engine/tb_digest.c crypto/rc4/rc4_skey.c
+        crypto/engine/tb_rsa.c crypto/engine/tb_dsa.c crypto/engine/eng_lib.c
+        crypto/engine/eng_openssl.c crypto/engine/tb_dh.c crypto/rc4/rc4_enc.c
+        crypto/chacha/chacha_enc.c crypto/engine/eng_ctrl.c crypto/camellia/camellia.c
+        crypto/engine/tb_cipher.c crypto/engine/eng_init.c crypto/engine/eng_table.c
+        crypto/sha/keccak1600.c crypto/engine/tb_asnmth.c crypto/engine/tb_rand.c
+        crypto/engine/tb_pkmeth.c
     )
 
     add_library(crypto STATIC ${crypto_SRCS})
 
     target_include_directories(crypto PRIVATE crypto/include include ${CMAKE_CURRENT_SOURCE_DIR} crypto crypto/ec/curve448 crypto/modes crypto/ec/curve448/arch_32)
-    target_compile_definitions(crypto PRIVATE  ECP_NISTZ256_ASM SHA1_ASM POLY1305_ASM GHASH_ASM ENGINESDIR="${ENGINESDIR}" OPENSSL_BN_ASM_MONT5 VPAES_ASM KECCAK1600_ASM L_ENDIAN X25519_ASM OPENSSLDIR="${OPENSSLDIR}" RC4_ASM MD5_ASM SHA256_ASM OPENSSL_IA32_SSE2 OPENSSL_PIC OPENSSL_BN_ASM_MONT OPENSSL_BN_ASM_GF2m SHA512_ASM OPENSSL_CPUID_OBJ OPENSSL_USE_NODELETE)
+    target_compile_definitions(crypto PRIVATE  ENGINESDIR="${ENGINESDIR}" OPENSSLDIR="${OPENSSLDIR}"  L_ENDIAN OPENSSL_USE_NODELETE OPENSSL_PIC)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -m64 -Wa,--noexecstack -fPIC")
     set_clang_unused()
 endif()
