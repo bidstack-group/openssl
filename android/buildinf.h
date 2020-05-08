@@ -1,9 +1,9 @@
-#if not __ANDROID__
+#if !__ANDROID__
     #error "This header file should only be used for building Android native library."
 #endif
 
 #ifdef __ARM_ARCH
-    #if __ARM_ISA_A64
+    #if __ARM_ARCH_ISA_A64
         #define PLATFORM "platform: android-arm64"
         #define DATE "built on: Fri Jan 17 12:19:37 2020 UTC"
         static const char compiler_flags[] = {
@@ -36,7 +36,7 @@
             'N','D','E','B','U','G',' ','-','D','_','_','A','N','D','R','O',
             'I','D','_','A','P','I','_','_','=','2','1','\0'
         };
-    #elif __ARM_ISA_ARM
+    #elif __ARM_ARCH_ISA_ARM
         #define PLATFORM "platform: android-arm"
         #define DATE "built on: Fri Jan 17 12:10:45 2020 UTC"
         static const char compiler_flags[] = {
@@ -71,7 +71,7 @@
         };
     #else
         #error "Cannot determine ARM architecture"
-    #endif //__ARM_ISA_ARM
+    #endif //__ARM_ARCH_ISA_ARM
 #elif __i386
     #define PLATFORM "platform: android-x86"
     #define DATE "built on: Fri Jan 17 11:09:15 2020 UTC"

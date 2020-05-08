@@ -1,4 +1,4 @@
-#if not __ANDROID__
+#if !__ANDROID__
     #error "This header file should only be used for building Android native library."
 #endif
 
@@ -173,7 +173,7 @@ extern "C" {
 #undef OPENSSL_EXPORT_VAR_AS_FUNCTION
 
 #ifdef __ARM_ARCH
-    #if __ARM_ISA_A64
+    #if __ARM_ARCH_ISA_A64
     
         #if !defined(OPENSSL_SYS_UEFI)
         # undef BN_LLONG
@@ -184,7 +184,7 @@ extern "C" {
         
         #define RC4_INT unsigned char
     
-    #elif __ARM_ISA_ARM
+    #elif __ARM_ARCH_ISA_ARM
     
         #if !defined(OPENSSL_SYS_UEFI)
         # define BN_LLONG
@@ -197,7 +197,7 @@ extern "C" {
         #define RC4_INT unsigned char
     #else
         #error "Cannot determine ARM architecture"
-    #endif //__ARM_ISA_ARM
+    #endif //__ARM_ARCH_ISA_ARM
 #elif __i386
 
     #if !defined(OPENSSL_SYS_UEFI)
