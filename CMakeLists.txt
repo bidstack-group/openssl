@@ -330,14 +330,15 @@ elseif(CMAKE_OSX_SYSROOT MATCHES iPhoneOS)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mios-version-min=7.0.0 -fno-common -fPIC ")
         
 elseif(ANDROID)
+    #headers are common for all android architectures
+    file(COPY android/opensslconf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/include/openssl/)
+    file(COPY android/bn_conf.h android/dso_conf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/include/internal/)
+    file(COPY android/buildinf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/)
+
     if(${ANDROID_ABI} STREQUAL "x86_64")
 
         set(arch "android-x86_64")
         message("Building ${arch}")
-        
-        file(COPY android/${arch}/opensslconf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/include/openssl/)
-        file(COPY android/${arch}/bn_conf.h android/${arch}/dso_conf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/include/internal/)
-        file(COPY android/${arch}/buildinf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/)
             
         add_library(ssl STATIC ${COMMON_ssl_SRCS})
 
@@ -360,10 +361,6 @@ elseif(ANDROID)
         set(arch "android-x86")
         message("Building ${arch}")
 
-        file(COPY android/${arch}/opensslconf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/include/openssl/)
-        file(COPY android/${arch}/bn_conf.h android/${arch}/dso_conf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/include/internal/)
-        file(COPY android/${arch}/buildinf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/)
-
         add_library(ssl STATIC ${COMMON_ssl_SRCS})
 
         target_include_directories(ssl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} include)
@@ -385,10 +382,6 @@ elseif(ANDROID)
         set(arch "android-arm")
         message("Building ${arch}")
         
-        file(COPY android/${arch}/opensslconf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/include/openssl/)
-        file(COPY android/${arch}/bn_conf.h android/${arch}/dso_conf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/include/internal/)
-        file(COPY android/${arch}/buildinf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/)
-            
         add_library(ssl STATIC ${COMMON_ssl_SRCS})
 
         target_include_directories(ssl PRIVATE include ${CMAKE_CURRENT_SOURCE_DIR})
@@ -410,10 +403,6 @@ elseif(ANDROID)
         set(arch "android-arm64")
         message("Building ${arch}")
         
-        file(COPY android/${arch}/opensslconf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/include/openssl/)
-        file(COPY android/${arch}/bn_conf.h android/${arch}/dso_conf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/include/internal/)
-        file(COPY android/${arch}/buildinf.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/crypto/)
-            
         add_library(ssl STATIC ${COMMON_ssl_SRCS})
 
         target_include_directories(ssl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} include)
