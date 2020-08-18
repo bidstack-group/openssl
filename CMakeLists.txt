@@ -424,6 +424,45 @@ elseif(WIN32)
 
     message(FATAL_ERROR("Windows is not currently supported"))
 
+elseif(CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
+    set(arch "BSD-x86_64")
+    message("Building ${arch}")
+    
+    find_program(PERL_EXECUTABLE perl)
+    if(NOT PERL_EXECUTABLE)
+        message(FATAL_ERROR("Perl not found"))
+    endif(NOT PERL_EXECUTABLE)
+
+    generate_configdata(${arch} no-asm)
+    generate_mkbuildinf("clang -pthread -m64 -Wa,--noexecstack -DOPENSSL_USE_NODELETE -DL_ENDIAN -DOPENSSL_PIC -DOPENSSL_CPUID_OBJ -DOPENSSL_IA32_SSE2 -DOPENSSL_BN_ASM_MONT -DOPENSSL_BN_ASM_MONT5 -DOPENSSL_BN_ASM_GF2m -DSHA1_ASM -DSHA256_ASM -DSHA512_ASM -DKECCAK1600_ASM -DRC4_ASM -DMD5_ASM -DVPAES_ASM -DGHASH_ASM -DECP_NISTZ256_ASM -DX25519_ASM -DPOLY1305_ASM" "BSD-x86_64")
+    generate_headers(${arch})
+        
+    add_library(ssl STATIC ${COMMON_ssl_SRCS})
+
+    TARGET_INCLUDE_DIRECTORIES(ssl PRIVATE include ${CMAKE_CURRENT_SOURCE_DIR})
+    TARGET_COMPILE_DEFINITIONS(ssl PRIVATE  OPENSSL_PIC OPENSSLDIR=${OPENSSLDIR} ENGINESDIR=${ENGINESDIR} L_ENDIAN _THREAD_SAFE _REENTRANT)
+    
+    SET(crypto_SRCS
+        ${COMMON_crypto_SRCS}
+        crypto/mem_clr.c crypto/camellia/cmll_cbc.c crypto/engine/eng_devcrypto.c
+        crypto/engine/tb_rsa.c crypto/engine/eng_list.c crypto/engine/eng_table.c
+        crypto/whrlpool/wp_block.c crypto/engine/tb_pkmeth.c crypto/engine/eng_all.c
+        crypto/engine/eng_openssl.c crypto/engine/eng_lib.c crypto/rc4/rc4_enc.c
+        crypto/camellia/camellia.c crypto/engine/eng_cnf.c crypto/bn/bn_asm.c
+        crypto/engine/eng_err.c crypto/engine/tb_asnmth.c crypto/engine/tb_dsa.c
+        crypto/engine/tb_cipher.c crypto/sha/keccak1600.c crypto/engine/tb_dh.c
+        crypto/engine/eng_pkey.c crypto/engine/eng_rdrand.c crypto/engine/tb_eckey.c
+        crypto/engine/eng_fat.c crypto/engine/tb_rand.c crypto/engine/eng_init.c
+        crypto/engine/eng_dyn.c crypto/rc4/rc4_skey.c crypto/chacha/chacha_enc.c
+        crypto/engine/tb_digest.c crypto/engine/eng_ctrl.c
+    )
+
+    add_library(crypto STATIC ${crypto_SRCS})
+
+    TARGET_INCLUDE_DIRECTORIES(crypto PRIVATE crypto/ec/curve448 crypto/include crypto/ec/curve448/arch_32 ${CMAKE_CURRENT_SOURCE_DIR} crypto/modes include crypto)
+    TARGET_COMPILE_DEFINITIONS(crypto PRIVATE  OPENSSL_PIC OPENSSLDIR=${OPENSSLDIR} ENGINESDIR=${ENGINESDIR} L_ENDIAN _THREAD_SAFE _REENTRANT)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -fPIC -pthread")
+
 elseif(UNIX)
 
     set(arch "linux-x86_64-clang")
